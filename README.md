@@ -6,7 +6,7 @@
 
 - 原生 Siri AI iPhone：按 GestaltEdit 的机型映射，只改 `CacheExtra` 的国家码、销售区域与监管型号。
 - 旧机型实验模式：iOS 27+、iPhone 11 起、非原生 AI 型号；可选择 iPhone 15 Pro 至 iPhone 17 系列的已知 Siri AI 机型。在全屏红色风险确认后，额外伪装产品、硬件与 CPU 型号，并设置 `SiriMode = 2`。**可能失去 Face ID、发生循环重启或需要恢复设备；功能未经真机验证。**
-- 写入前把原始 plist 保存到应用 Documents/GestaltBackups，读回验证备份；写入后读回验证关键字段。写入或验证失败时尝试恢复原始数据。
+- 写入前把原始 plist 保存到应用 Documents/GestaltBackups，读回验证备份；主文件参照 BQTool 的原位写入方式保留 inode，再读回验证完整数据及关键字段。写入或验证失败时尝试原位恢复原始数据。
 - 未知型号或区域字段异常时拒绝写入。新型号需核实对应美版监管型号后才能加入映射。
 
 ## 构建与签名

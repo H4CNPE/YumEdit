@@ -28,7 +28,7 @@ struct ContentView: View {
                         Text("一键切换美版设备区域").font(.subheadline).foregroundStyle(.white.opacity(0.65))
                     }
                     VStack(alignment: .leading, spacing: 12) {
-                        Label(success ? "已写入并校验" : "设备状态", systemImage: success ? "checkmark.seal.fill" : "iphone.gen3")
+                        Label(success ? "缓存文件已写入并校验" : "设备状态", systemImage: success ? "checkmark.seal.fill" : "iphone.gen3")
                             .font(.headline)
                         Text(status).font(.subheadline).foregroundStyle(.white.opacity(0.72))
                     }
@@ -218,8 +218,10 @@ nonisolated private enum RegionWriter {
             modified["CacheExtra"] = extra
             let data = try PropertyListSerialization.data(fromPropertyList: modified, format: .binary, options: 0)
             do {
-                try data.write(to: target, options: .atomic)
-                let verifyRoot = try PropertyListSerialization.propertyList(from: Data(contentsOf: target), format: nil) as? [String: Any]
+                try overwriteInPlace(data, at: target)
+                let written = try Data(contentsOf: target)
+                guard written == data else { throw WriteError.verify }
+                let verifyRoot = try PropertyListSerialization.propertyList(from: written, format: nil) as? [String: Any]
                 let verify = verifyRoot?["CacheExtra"] as? [String: Any]
                 guard verify?[country] as? String == "LL", verify?[region] as? String == "LL/A",
                       verify?[regulatory] as? String == model else { throw WriteError.verify }
@@ -232,14 +234,15 @@ nonisolated private enum RegionWriter {
                 }
             } catch {
                 do {
-                    try original.write(to: target, options: .atomic)
+                    try overwriteInPlace(original, at: target)
                     guard try Data(contentsOf: target) == original else { throw WriteError.restore }
                     return (false, "写入失败：\(error.localizedDescription)。已恢复并校验原始文件；备份位于 GestaltBackups。")
                 } catch {
                     return (false, "严重错误：写入后恢复未能校验。请勿重启，使用 GestaltBackups 中的备份恢复。\(error.localizedDescription)")
                 }
             }
-            return (true, "已写入 LL、LL/A、\(model) 并校验。原始文件保存在“文件”App 的 GestaltBackups。请重启设备。")
+            let profileText = oldDevice ? "；伪装为 \(spoof.name)" : ""
+            return (true, "已写入 LL、LL/A、\(model)\(profileText) 并读回校验。请重启设备再检查 Siri AI；本结果只证明缓存文件已修改，不代表系统功能已启用。备份在“文件”App 的 GestaltBackups。")
         } catch {
             return (false, "操作失败：\(error.localizedDescription)。请检查 GestaltBackups。")
         }
@@ -248,6 +251,25 @@ nonisolated private enum RegionWriter {
     private enum WriteError: LocalizedError {
         case verify, restore
         var errorDescription: String? { self == .verify ? "写后校验失败" : "恢复后校验失败" }
+    }
+    private static func overwriteInPlace(_ data: Data, at url: URL) throws {
+        let fd = open(url.path, O_WRONLY | O_CLOEXEC)
+        guard fd >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        defer { close(fd) }
+        try data.withUnsafeBytes { raw in
+            guard let base = raw.baseAddress else { throw POSIXError(.EINVAL) }
+            var offset = 0
+            while offset < raw.count {
+                let count = pwrite(fd, base.advanced(by: offset), raw.count - offset, off_t(offset))
+                if count < 0 && errno == EINTR { continue }
+                guard count > 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+                offset += count
+            }
+        }
+        guard ftruncate(fd, off_t(data.count)) == 0 else {
+            throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+        }
+        guard fsync(fd) == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
     }
     private static func deviceIdentifier() -> String {
         var size = 0
