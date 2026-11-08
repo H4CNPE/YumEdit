@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var busy = false
     @State private var success = false
     @State private var experimental = false
+    @State private var spoofProduct = "iPhone16,1"
     @State private var showRisk = false
     @State private var status = "备份 MobileGestalt 后，将已知机型的区域切换为美版。"
 
@@ -37,13 +38,24 @@ struct ContentView: View {
                     Toggle(isOn: $experimental) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("旧机型实验模式").font(.headline)
-                            Text("iPhone 11 起；伪装为 iPhone 15 Pro，可能导致 Face ID 失效")
+                            Text("iPhone 11 起；伪装设备身份，可能导致 Face ID 失效")
                                 .font(.caption).foregroundStyle(.white.opacity(0.58))
                         }
                     }
                     .tint(.red)
                     .padding(20)
                     .background(Color.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 22))
+                    if experimental {
+                        Picker("伪装机型", selection: $spoofProduct) {
+                            ForEach(RegionWriter.spoofProfiles) { profile in
+                                Text(profile.name).tag(profile.product)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .tint(.white)
+                        .padding(16)
+                        .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 18))
+                    }
                     Button {
                         if experimental {
                             showRisk = true
@@ -69,7 +81,7 @@ struct ContentView: View {
                 VStack(spacing: 22) {
                     Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 70))
                     Text("高风险：设备身份伪装").font(.largeTitle.bold()).multilineTextAlignment(.center)
-                    Text("将产品、硬件与 CPU 型号伪装为 iPhone 15 Pro，并把 SiriMode 设为 2。可能暂时破坏 Face ID、导致系统不稳定或循环重启，甚至需要恢复设备。效果未经验证。")
+                    Text("将产品、硬件与 CPU 型号伪装为 \(RegionWriter.spoofProfiles.first(where: { $0.product == spoofProduct })?.name ?? "所选机型")，并把 SiriMode 设为 2。可能暂时破坏 Face ID、导致系统不稳定或循环重启，甚至需要恢复设备。效果未经验证。")
                         .font(.body).multilineTextAlignment(.center)
                     Button("我了解风险，继续写入") {
                         showRisk = false
@@ -90,8 +102,9 @@ struct ContentView: View {
         busy = true
         status = "正在备份、写入并校验…"
         let oldDevice = experimental
+        let selectedSpoof = spoofProduct
         Task.detached {
-            let result = RegionWriter.apply(experimental: oldDevice)
+            let result = RegionWriter.apply(experimental: oldDevice, spoofProduct: selectedSpoof)
             await MainActor.run {
                 busy = false
                 success = result.0
@@ -102,6 +115,28 @@ struct ContentView: View {
 }
 
 nonisolated private enum RegionWriter {
+    struct SpoofProfile: Identifiable, Sendable {
+        let name: String
+        let product: String
+        let board: String
+        let cpu: String
+        let regulatory: String
+        var id: String { product }
+    }
+    static let spoofProfiles: [SpoofProfile] = [
+        .init(name: "iPhone 15 Pro", product: "iPhone16,1", board: "D83AP", cpu: "t8130", regulatory: "A2848"),
+        .init(name: "iPhone 15 Pro Max", product: "iPhone16,2", board: "D84AP", cpu: "t8130", regulatory: "A2849"),
+        .init(name: "iPhone 16", product: "iPhone17,3", board: "D47AP", cpu: "t8140", regulatory: "A3081"),
+        .init(name: "iPhone 16 Plus", product: "iPhone17,4", board: "D48AP", cpu: "t8140", regulatory: "A3082"),
+        .init(name: "iPhone 16 Pro", product: "iPhone17,1", board: "D93AP", cpu: "t8140", regulatory: "A3083"),
+        .init(name: "iPhone 16 Pro Max", product: "iPhone17,2", board: "D94AP", cpu: "t8140", regulatory: "A3084"),
+        .init(name: "iPhone 16e", product: "iPhone17,5", board: "V59AP", cpu: "t8140", regulatory: "A3212"),
+        .init(name: "iPhone 17", product: "iPhone18,3", board: "V57AP", cpu: "t8150", regulatory: "A3258"),
+        .init(name: "iPhone 17 Pro", product: "iPhone18,1", board: "V53AP", cpu: "t8150", regulatory: "A3256"),
+        .init(name: "iPhone 17 Pro Max", product: "iPhone18,2", board: "V54AP", cpu: "t8150", regulatory: "A3257"),
+        .init(name: "iPhone Air", product: "iPhone18,4", board: "D23AP", cpu: "t8150", regulatory: "A3260"),
+        .init(name: "iPhone 17e", product: "iPhone18,5", board: "V159AP", cpu: "t8150", regulatory: "A3575")
+    ]
     private static let dir = "/private/var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches"
     private static let country = "h63QSdBCiT/z0WU6rdQv6Q"
     private static let region = "yK+xavymRGZ3xWc1tb8XDg"
@@ -119,7 +154,7 @@ nonisolated private enum RegionWriter {
         "iPhone 17 Pro Max": "A3257", "iPhone 17e": "A3575", "iPhone Air": "A3260"
     ]
 
-    nonisolated static func apply(experimental: Bool) -> (Bool, String) {
+    nonisolated static func apply(experimental: Bool, spoofProduct: String) -> (Bool, String) {
         let signedGroups = YumEditSigningGroups() ?? []
         guard !signedGroups.isEmpty else {
             return (false, "当前签名没有 App Group。P12 证书本身不授予此权限；请使用包含 App Group 的 provisioning profile 重新签名。")
@@ -145,7 +180,10 @@ nonisolated private enum RegionWriter {
             let name = nameKeys.compactMap { extra[$0] as? String }.first { names[$0] != nil }
             let nativeModel = products[machine] ?? (family >= 18 ? name.flatMap({ names[$0] }) : nil)
             let oldDevice = experimental && nativeModel == nil && (12...17).contains(family)
-            guard let model = oldDevice ? "A2848" : nativeModel else {
+            guard let spoof = spoofProfiles.first(where: { $0.product == spoofProduct }) else {
+                return (false, "未知伪装机型，未写入")
+            }
+            guard let model = oldDevice ? spoof.regulatory : nativeModel else {
                 return (false, "未知机型 \(machine)，未写入")
             }
             if experimental && !oldDevice { return (false, "实验模式仅用于 iPhone 11 起的非原生 AI 机型") }
@@ -171,9 +209,9 @@ nonisolated private enum RegionWriter {
             extra[regulatory] = model
             if oldDevice {
                 extra["A62OafQ85EJAiiqKn4agtg"] = 1
-                extra["h9jDsbgj7xIVeIQ8S3/X3Q"] = "iPhone16,1"
-                extra["oYicEKzVTz4/CxxE05pEgQ"] = "D83AP"
-                extra["5pYKlGnYYBzGvAlIU8RjEQ"] = "t8130"
+                extra["h9jDsbgj7xIVeIQ8S3/X3Q"] = spoof.product
+                extra["oYicEKzVTz4/CxxE05pEgQ"] = spoof.board
+                extra["5pYKlGnYYBzGvAlIU8RjEQ"] = spoof.cpu
                 extra["a3n5T9sFtlyQ74NEp9ESxg"] = 2
             }
             var modified = root
@@ -188,9 +226,9 @@ nonisolated private enum RegionWriter {
                 if oldDevice {
                     guard verify?["a3n5T9sFtlyQ74NEp9ESxg"] as? Int == 2,
                           verify?["A62OafQ85EJAiiqKn4agtg"] as? Int == 1,
-                          verify?["h9jDsbgj7xIVeIQ8S3/X3Q"] as? String == "iPhone16,1",
-                          verify?["oYicEKzVTz4/CxxE05pEgQ"] as? String == "D83AP",
-                          verify?["5pYKlGnYYBzGvAlIU8RjEQ"] as? String == "t8130" else { throw WriteError.verify }
+                          verify?["h9jDsbgj7xIVeIQ8S3/X3Q"] as? String == spoof.product,
+                          verify?["oYicEKzVTz4/CxxE05pEgQ"] as? String == spoof.board,
+                          verify?["5pYKlGnYYBzGvAlIU8RjEQ"] as? String == spoof.cpu else { throw WriteError.verify }
                 }
             } catch {
                 do {
