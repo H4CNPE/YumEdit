@@ -87,17 +87,17 @@ struct ContentView: View {
     }
 
     private func run() {
-                        busy = true
-                        status = "正在备份、写入并校验…"
-                        let oldDevice = experimental
-                        Task.detached {
-                            let result = RegionWriter.apply(experimental: oldDevice)
-                            await MainActor.run {
-                                busy = false
-                                success = result.0
-                                status = result.1
-                            }
-                        }
+        busy = true
+        status = "正在备份、写入并校验…"
+        let oldDevice = experimental
+        Task.detached {
+            let result = RegionWriter.apply(experimental: oldDevice)
+            await MainActor.run {
+                busy = false
+                success = result.0
+                status = result.1
+            }
+        }
     }
 }
 
@@ -125,7 +125,7 @@ nonisolated private enum RegionWriter {
             return (false, "签名缺少 App Group：\(group)")
         }
         let handle = worse_query(dir, group, false, false)
-        guard handle >= 0 else { return (false, "无法访问 MobileGestalt（worse_query: \(handle)）") }
+        guard handle >= 0 else { return (false, "无法访问 MobileGestalt（错误码：\(handle)）") }
         defer { worse_query_release(handle) }
         let target = URL(fileURLWithPath: dir).appendingPathComponent("com.apple.MobileGestalt.plist")
         do {

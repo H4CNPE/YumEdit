@@ -1,6 +1,6 @@
 //
-//  worse_queryApp.swift
-//  worse_query
+//  YumEditApp.swift
+//  YumEdit
 //
 //  Created by Taj C on 8/20/26.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct worse_queryApp: App {
+struct YumEditApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

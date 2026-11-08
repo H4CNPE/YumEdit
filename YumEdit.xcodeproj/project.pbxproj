@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		3657C2D9303730E800908AE2 /* worse_query.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = worse_query.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3657C2D9303730E800908AE2 /* YumEdit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YumEdit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		3657C2DB303730E800908AE2 /* worse_query */ = {
+		3657C2DB303730E800908AE2 /* YumEdit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = worse_query;
+			path = YumEdit;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -30,7 +30,7 @@
 		3657C2D0303730E800908AE2 = {
 			isa = PBXGroup;
 			children = (
-				3657C2DB303730E800908AE2 /* worse_query */,
+				3657C2DB303730E800908AE2 /* YumEdit */,
 				3657C2DA303730E800908AE2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -38,7 +38,7 @@
 		3657C2DA303730E800908AE2 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				3657C2D9303730E800908AE2 /* worse_query.app */,
+				3657C2D9303730E800908AE2 /* YumEdit.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -46,9 +46,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		3657C2D8303730E800908AE2 /* worse_query */ = {
+		3657C2D8303730E800908AE2 /* YumEdit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3657C2E4303730E900908AE2 /* Build configuration list for PBXNativeTarget "worse_query" */;
+			buildConfigurationList = 3657C2E4303730E900908AE2 /* Build configuration list for PBXNativeTarget "YumEdit" */;
 			buildPhases = (
 				3657C2D5303730E800908AE2 /* Sources */,
 				3657C2D6303730E800908AE2 /* Frameworks */,
@@ -57,11 +57,11 @@
 			buildRules = (
 			);
 			fileSystemSynchronizedGroups = (
-				3657C2DB303730E800908AE2 /* worse_query */,
+				3657C2DB303730E800908AE2 /* YumEdit */,
 			);
-			name = worse_query;
-			productName = worse_query;
-			productReference = 3657C2D9303730E800908AE2 /* worse_query.app */;
+			name = YumEdit;
+			productName = YumEdit;
+			productReference = 3657C2D9303730E800908AE2 /* YumEdit.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -80,7 +80,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3657C2D4303730E800908AE2 /* Build configuration list for PBXProject "worse_query" */;
+			buildConfigurationList = 3657C2D4303730E800908AE2 /* Build configuration list for PBXProject "YumEdit" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -94,7 +94,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				3657C2D8303730E800908AE2 /* worse_query */,
+				3657C2D8303730E800908AE2 /* YumEdit */,
 			);
 		};
 /* End PBXProject section */
@@ -116,7 +116,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		3657C2E2303730E900908AE2 /* Debug configuration for PBXProject "worse_query" */ = {
+		3657C2E2303730E900908AE2 /* Debug configuration for PBXProject "YumEdit" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -180,7 +180,7 @@
 			};
 			name = Debug;
 		};
-		3657C2E3303730E900908AE2 /* Release configuration for PBXProject "worse_query" */ = {
+		3657C2E3303730E900908AE2 /* Release configuration for PBXProject "YumEdit" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -237,13 +237,13 @@
 			};
 			name = Release;
 		};
-		3657C2E5303730E900908AE2 /* Debug configuration for PBXNativeTarget "worse_query" */ = {
+		3657C2E5303730E900908AE2 /* Debug configuration for PBXNativeTarget "YumEdit" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = worse_query/worse_query.entitlements;
+				CODE_SIGN_ENTITLEMENTS = YumEdit/YumEdit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B2F9932GMA;
@@ -275,7 +275,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "worse_query/worse_query-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "YumEdit/YumEdit-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -284,13 +284,13 @@
 			};
 			name = Debug;
 		};
-		3657C2E6303730E900908AE2 /* Release configuration for PBXNativeTarget "worse_query" */ = {
+		3657C2E6303730E900908AE2 /* Release configuration for PBXNativeTarget "YumEdit" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = worse_query/worse_query.entitlements;
+				CODE_SIGN_ENTITLEMENTS = YumEdit/YumEdit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B2F9932GMA;
@@ -322,7 +322,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "worse_query/worse_query-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "YumEdit/YumEdit-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -333,19 +333,19 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3657C2D4303730E800908AE2 /* Build configuration list for PBXProject "worse_query" */ = {
+		3657C2D4303730E800908AE2 /* Build configuration list for PBXProject "YumEdit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3657C2E2303730E900908AE2 /* Debug configuration for PBXProject "worse_query" */,
-				3657C2E3303730E900908AE2 /* Release configuration for PBXProject "worse_query" */,
+				3657C2E2303730E900908AE2 /* Debug configuration for PBXProject "YumEdit" */,
+				3657C2E3303730E900908AE2 /* Release configuration for PBXProject "YumEdit" */,
 			);
 			defaultConfigurationName = Release;
 		};
-		3657C2E4303730E900908AE2 /* Build configuration list for PBXNativeTarget "worse_query" */ = {
+		3657C2E4303730E900908AE2 /* Build configuration list for PBXNativeTarget "YumEdit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3657C2E5303730E900908AE2 /* Debug configuration for PBXNativeTarget "worse_query" */,
-				3657C2E6303730E900908AE2 /* Release configuration for PBXNativeTarget "worse_query" */,
+				3657C2E5303730E900908AE2 /* Debug configuration for PBXNativeTarget "YumEdit" */,
+				3657C2E6303730E900908AE2 /* Release configuration for PBXNativeTarget "YumEdit" */,
 			);
 			defaultConfigurationName = Release;
 		};
