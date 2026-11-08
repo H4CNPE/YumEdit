@@ -102,7 +102,6 @@ struct ContentView: View {
 }
 
 nonisolated private enum RegionWriter {
-    private static let group = "group.com.hyumpix.yumedit"
     private static let dir = "/private/var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches"
     private static let country = "h63QSdBCiT/z0WU6rdQv6Q"
     private static let region = "yK+xavymRGZ3xWc1tb8XDg"
@@ -121,8 +120,14 @@ nonisolated private enum RegionWriter {
     ]
 
     nonisolated static func apply(experimental: Bool) -> (Bool, String) {
-        guard FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) != nil else {
-            return (false, "签名缺少 App Group：\(group)")
+        let signedGroups = YumEditSigningGroups() ?? []
+        guard !signedGroups.isEmpty else {
+            return (false, "当前签名没有 App Group。P12 证书本身不授予此权限；请使用包含 App Group 的 provisioning profile 重新签名。")
+        }
+        guard let group = signedGroups.first(where: {
+            FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: $0) != nil
+        }) else {
+            return (false, "签名含 App Group，但其容器不可访问：\(signedGroups.joined(separator: ", "))")
         }
         let handle = worse_query(dir, group, false, false)
         guard handle >= 0 else { return (false, "无法访问 MobileGestalt（错误码：\(handle)）") }

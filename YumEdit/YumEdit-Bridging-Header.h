@@ -3,4 +3,5 @@
 //
 
 #include "worse_query.h"
+#include "SigningGroups.h"
 #include "pathleak.h"
