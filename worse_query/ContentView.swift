@@ -135,8 +135,10 @@ nonisolated private enum RegionWriter {
                 return (false, "plist 结构不符合预期，未写入")
             }
             let machine = deviceIdentifier()
-            let nativeModel = products[machine]
             let family = Int(machine.dropFirst(6).prefix(while: { $0.isNumber })) ?? 0
+            let nameKeys = ["Z/dqyWS6OZTRy10UcmUAhw", "bbtR9jQx50Fv5Af/affNtA"]
+            let name = nameKeys.compactMap { extra[$0] as? String }.first { names[$0] != nil }
+            let nativeModel = products[machine] ?? (family >= 18 ? name.flatMap({ names[$0] }) : nil)
             let oldDevice = experimental && nativeModel == nil && (12...17).contains(family)
             guard let model = oldDevice ? "A2848" : nativeModel else {
                 return (false, "未知机型 \(machine)，未写入")
