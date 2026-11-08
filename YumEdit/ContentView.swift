@@ -1,5 +1,6 @@
 import SwiftUI
 import Darwin
+import UniformTypeIdentifiers
 
 private let accent = Color(red: 0.13, green: 0.44, blue: 0.96)
 private let accent2 = Color(red: 0.30, green: 0.68, blue: 1)
@@ -11,6 +12,10 @@ struct ContentView: View {
     @State private var experimental = false
     @State private var spoofProduct = "iPhone16,1"
     @State private var showRisk = false
+    @State private var showRestoreConfirm = false
+    @State private var showImportPicker = false
+    @State private var restoreURL: URL?
+    @State private var restoreDescription = ""
     @State private var status = "备份 MobileGestalt 后，将已知机型的区域切换为美版。"
 
     var body: some View {
@@ -57,6 +62,7 @@ struct ContentView: View {
                         .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 18))
                     }
                     Button {
+                        TapSound.play()
                         if experimental {
                             showRisk = true
                             return
@@ -66,6 +72,26 @@ struct ContentView: View {
                         Label(busy ? "处理中…" : "强制开启 Siri AI", systemImage: "sparkles")
                             .font(.headline).frame(maxWidth: .infinity).padding(.vertical, 18)
                             .background(brand, in: RoundedRectangle(cornerRadius: 18))
+                    }
+                    .buttonStyle(.plain).disabled(busy)
+                    Button {
+                        TapSound.play()
+                        do {
+                            let candidate = try RegionWriter.latestBackup()
+                            restoreURL = candidate.url
+                            restoreDescription = candidate.description
+                            showRestoreConfirm = true
+                        } catch RegionWriter.RestoreError.noBackup {
+                            showImportPicker = true
+                        } catch {
+                            success = false
+                            status = "无法准备恢复：\(error.localizedDescription)"
+                        }
+                    } label: {
+                        Label("恢复最近一次 plist 备份", systemImage: "arrow.uturn.backward")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity).padding(.vertical, 14)
+                            .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
                     }
                     .buttonStyle(.plain).disabled(busy)
                     Text("仅写入已知机型。请先完成整机备份。")
@@ -95,6 +121,30 @@ struct ContentView: View {
                 .padding(28).frame(maxWidth: 600)
             }
         }
+        .alert("恢复 MobileGestalt 备份", isPresented: $showRestoreConfirm) {
+            Button("恢复所示备份", role: .destructive) {
+                guard let restoreURL else { return }
+                runRestore(restoreURL)
+            }
+            Button("取消", role: .cancel) { }
+        } message: {
+            Text("\(restoreDescription)\n\n此备份可能已被其他工具修改；只会恢复为文件内的状态。当前缓存会另存为 PreRestore 备份。恢复后需重启。")
+        }
+        .fileImporter(isPresented: $showImportPicker, allowedContentTypes: [.item]) { result in
+            do {
+                let url = try result.get()
+                let access = url.startAccessingSecurityScopedResource()
+                defer { if access { url.stopAccessingSecurityScopedResource() } }
+                let candidate = try RegionWriter.importBackup(from: url)
+                restoreURL = candidate.url
+                restoreDescription = candidate.description
+                showRestoreConfirm = true
+            } catch {
+                success = false
+                status = "导入备份失败：\(error.localizedDescription)"
+            }
+        }
+        .onAppear { TapSound.prepare() }
         .preferredColorScheme(.dark)
     }
 
@@ -105,6 +155,18 @@ struct ContentView: View {
         let selectedSpoof = spoofProduct
         Task.detached {
             let result = RegionWriter.apply(experimental: oldDevice, spoofProduct: selectedSpoof)
+            await MainActor.run {
+                busy = false
+                success = result.0
+                status = result.1
+            }
+        }
+    }
+    private func runRestore(_ backup: URL) {
+        busy = true
+        status = "正在保存当前缓存并恢复备份…"
+        Task.detached {
+            let result = RegionWriter.restore(from: backup)
             await MainActor.run {
                 busy = false
                 success = result.0
@@ -153,6 +215,95 @@ nonisolated private enum RegionWriter {
         "iPhone 17": "A3258", "iPhone 17 Pro": "A3256",
         "iPhone 17 Pro Max": "A3257", "iPhone 17e": "A3575", "iPhone Air": "A3260"
     ]
+    private static var backupDirectory: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("GestaltBackups", isDirectory: true)
+    }
+
+    struct BackupChoice: Sendable {
+        let url: URL
+        let description: String
+    }
+    static func latestBackup() throws -> BackupChoice {
+        guard FileManager.default.fileExists(atPath: backupDirectory.path) else {
+            throw RestoreError.noBackup
+        }
+        let files = try FileManager.default.contentsOfDirectory(
+            at: backupDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)
+            .filter { $0.lastPathComponent.hasPrefix("MobileGestalt-") && $0.pathExtension == "plist" }
+        guard let url = files.max(by: {
+            let a = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+            let b = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+            return a < b
+        }) else { throw RestoreError.noBackup }
+        let data = try Data(contentsOf: url)
+        guard let root = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+              let extra = root["CacheExtra"] as? [String: Any] else { throw RestoreError.invalidBackup }
+        let area = extra[region] as? String ?? "未知区域"
+        let model = extra[regulatory] as? String ?? "未知型号"
+        return BackupChoice(url: url, description: "文件：\(url.lastPathComponent)\n备份内容：\(area)、\(model)")
+    }
+
+    static func importBackup(from source: URL) throws -> BackupChoice {
+        let data = try Data(contentsOf: source)
+        guard let root = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+              let extra = root["CacheExtra"] as? [String: Any],
+              extra[country] is String, extra[region] is String, extra[regulatory] is String else {
+            throw RestoreError.invalidBackup
+        }
+        try FileManager.default.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+        let stored = backupDirectory.appendingPathComponent("MobileGestalt-Imported-\(UUID().uuidString).plist")
+        try data.write(to: stored, options: .atomic)
+        guard try Data(contentsOf: stored) == data else { throw RestoreError.invalidBackup }
+        return BackupChoice(url: stored, description: "导入文件：\(source.lastPathComponent)\n备份内容：\(extra[region] as? String ?? "未知区域")、\(extra[regulatory] as? String ?? "未知型号")")
+    }
+
+    static func restore(from backup: URL) -> (Bool, String) {
+        guard backup.deletingLastPathComponent().standardizedFileURL == backupDirectory.standardizedFileURL,
+              backup.lastPathComponent.hasPrefix("MobileGestalt-"), backup.pathExtension == "plist" else {
+            return (false, "备份路径无效，未恢复")
+        }
+        do {
+            let original = try Data(contentsOf: backup)
+            guard let root = try PropertyListSerialization.propertyList(from: original, format: nil) as? [String: Any],
+                  root["CacheExtra"] is [String: Any] else { return (false, "备份 plist 无效，未恢复") }
+            let signedGroups = YumEditSigningGroups() ?? []
+            guard let group = signedGroups.first(where: {
+                FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: $0) != nil
+            }) else { return (false, "当前签名没有可用 App Group，无法恢复") }
+            let handle = worse_query(dir, group, false, false)
+            guard handle >= 0 else { return (false, "无法访问 MobileGestalt（错误码：\(handle)）") }
+            defer { worse_query_release(handle) }
+            let target = URL(fileURLWithPath: dir).appendingPathComponent("com.apple.MobileGestalt.plist")
+            let current = try Data(contentsOf: target)
+            if current == original { return (true, "当前缓存已与所选备份一致，无需恢复。") }
+            let safety = backupDirectory.appendingPathComponent("PreRestore-\(UUID().uuidString).plist")
+            try current.write(to: safety, options: .atomic)
+            guard try Data(contentsOf: safety) == current else { return (false, "恢复前安全备份校验失败，未写入") }
+            do {
+                try overwriteInPlace(original, at: target)
+                guard try Data(contentsOf: target) == original else { throw WriteError.verify }
+            } catch {
+                do {
+                    try overwriteInPlace(current, at: target)
+                    guard try Data(contentsOf: target) == current else { throw WriteError.restore }
+                    return (false, "恢复失败，已重新写回并校验操作前缓存：\(error.localizedDescription)")
+                } catch {
+                    return (false, "严重错误：恢复失败且无法校验操作前缓存。请勿重启，使用 GestaltBackups 手动恢复。")
+                }
+            }
+            return (true, "已原位恢复 \(backup.lastPathComponent) 并校验。操作前缓存另存为 \(safety.lastPathComponent)。请重启设备。")
+        } catch {
+            return (false, "恢复失败：\(error.localizedDescription)")
+        }
+    }
+
+    enum RestoreError: LocalizedError {
+        case noBackup, invalidBackup
+        var errorDescription: String? {
+            self == .noBackup ? "没有找到本 App 创建的 MobileGestalt 备份" : "最近一次备份不是有效的 MobileGestalt plist"
+        }
+    }
 
     nonisolated static func apply(experimental: Bool, spoofProduct: String) -> (Bool, String) {
         let signedGroups = YumEditSigningGroups() ?? []
@@ -198,8 +349,7 @@ nonisolated private enum RegionWriter {
             if !oldDevice, oldCountry == "LL", oldRegion == "LL/A", extra[regulatory] as? String == model {
                 return (true, "已经是美版目标值，无需写入")
             }
-            let backups = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                .appendingPathComponent("GestaltBackups", isDirectory: true)
+            let backups = backupDirectory
             try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
             let backup = backups.appendingPathComponent("MobileGestalt-\(UUID().uuidString).plist")
             try original.write(to: backup, options: .atomic)
