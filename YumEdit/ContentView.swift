@@ -1,6 +1,7 @@
 import SwiftUI
 import Darwin
 import UniformTypeIdentifiers
+import CoreFoundation
 
 private let accent = Color(red: 0.13, green: 0.44, blue: 0.96)
 private let accent2 = Color(red: 0.30, green: 0.68, blue: 1)
@@ -10,8 +11,14 @@ struct ContentView: View {
     @State private var busy = false
     @State private var success = false
     @State private var experimental = false
-    @State private var spoofProduct = "iPhone16,1"
+    @State private var spoofProduct = RegionWriter.isPad ? "iPad16,3" : "iPhone16,1"
     @State private var showRisk = false
+    @State private var showIslandRisk = false
+    @State private var showEditorRisk = false
+    @State private var showPresetsRisk = false
+    @State private var showEditor = false
+    @State private var showPresets = false
+    @State private var showAbout = false
     @State private var showRestoreConfirm = false
     @State private var showImportPicker = false
     @State private var restoreURL: URL?
@@ -43,7 +50,7 @@ struct ContentView: View {
                     Toggle(isOn: $experimental) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("旧机型实验模式").font(.headline)
-                            Text("iPhone 11 起；伪装设备身份，可能导致 Face ID 失效")
+                        Text("旧款 iPhone / iPad；伪装设备身份，可能导致 Face ID 或系统功能失效")
                                 .font(.caption).foregroundStyle(.white.opacity(0.58))
                         }
                     }
@@ -52,7 +59,7 @@ struct ContentView: View {
                     .background(Color.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 22))
                     if experimental {
                         Picker("伪装机型", selection: $spoofProduct) {
-                            ForEach(RegionWriter.spoofProfiles) { profile in
+                            ForEach(RegionWriter.isPad ? RegionWriter.padSpoofProfiles : RegionWriter.spoofProfiles) { profile in
                                 Text(profile.name).tag(profile.product)
                             }
                         }
@@ -64,6 +71,7 @@ struct ContentView: View {
                     Button {
                         TapSound.play()
                         if experimental {
+                            TapSound.play(.warning)
                             showRisk = true
                             return
                         }
@@ -74,6 +82,19 @@ struct ContentView: View {
                             .background(brand, in: RoundedRectangle(cornerRadius: 18))
                     }
                     .buttonStyle(.plain).disabled(busy)
+                    if RegionWriter.hasSmallNotch {
+                        Button {
+                            TapSound.play()
+                            TapSound.play(.warning)
+                            showIslandRisk = true
+                        } label: {
+                            Label("实验：灵动岛布局", systemImage: "capsule")
+                                .font(.subheadline.weight(.semibold))
+                                .frame(maxWidth: .infinity).padding(.vertical, 12)
+                                .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+                        }
+                        .buttonStyle(.plain).disabled(busy)
+                    }
                     Button {
                         TapSound.play()
                         do {
@@ -94,8 +115,37 @@ struct ContentView: View {
                             .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
                     }
                     .buttonStyle(.plain).disabled(busy)
+                    HStack(spacing: 10) {
+                        Button {
+                            TapSound.play(.warning)
+                            showEditorRisk = true
+                        } label: {
+                            Label("字段编辑", systemImage: "slider.horizontal.3")
+                                .frame(maxWidth: .infinity).padding(.vertical, 12)
+                                .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+                        }
+                        Button {
+                            TapSound.play(.warning)
+                            showPresetsRisk = true
+                        } label: {
+                            Label("预设修改", systemImage: "switch.2")
+                                .frame(maxWidth: .infinity).padding(.vertical, 12)
+                                .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+                        }
+                    }
+                    .font(.footnote.weight(.medium)).buttonStyle(.plain).disabled(busy)
                     Text("仅写入已知机型。请先完成整机备份。")
                         .font(.footnote).foregroundStyle(.white.opacity(0.5))
+                    Button {
+                        TapSound.play()
+                        showAbout = true
+                    } label: {
+                        Image(systemName: "info.circle").font(.title3)
+                            .foregroundStyle(.white.opacity(0.65))
+                            .frame(width: 44, height: 44)
+                    }
+                    .accessibilityLabel("贡献者与仓库")
+                    .buttonStyle(.plain)
                 }
                 .foregroundStyle(.white).padding(.horizontal, 24).padding(.top, 56)
                 .frame(maxWidth: 600).frame(maxWidth: .infinity).padding(.bottom, 40)
@@ -107,20 +157,42 @@ struct ContentView: View {
                 VStack(spacing: 22) {
                     Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 70))
                     Text("高风险：设备身份伪装").font(.largeTitle.bold()).multilineTextAlignment(.center)
-                    Text("将产品、硬件与 CPU 型号伪装为 \(RegionWriter.spoofProfiles.first(where: { $0.product == spoofProduct })?.name ?? "所选机型")，并把 SiriMode 设为 2。可能暂时破坏 Face ID、导致系统不稳定或循环重启，甚至需要恢复设备。效果未经验证。")
+                    Text("将产品、硬件与 CPU 型号伪装为 \((RegionWriter.isPad ? RegionWriter.padSpoofProfiles : RegionWriter.spoofProfiles).first(where: { $0.product == spoofProduct })?.name ?? "所选机型")，并把 SiriMode 设为 2。可能暂时破坏 Face ID、导致系统不稳定或循环重启，甚至需要恢复设备。效果未经验证。")
                         .font(.body).multilineTextAlignment(.center)
                     Button("我了解风险，继续写入") {
+                        TapSound.play(.confirm)
                         showRisk = false
                         run()
                     }
                     .font(.headline).padding(18).frame(maxWidth: .infinity)
                     .background(.white, in: RoundedRectangle(cornerRadius: 16))
                     .foregroundStyle(.red)
-                    Button("取消") { showRisk = false }.foregroundStyle(.white)
+                    Button("取消") { TapSound.play(); showRisk = false }.foregroundStyle(.white)
                 }
                 .padding(28).frame(maxWidth: 600)
             }
         }
+        .fullScreenCover(isPresented: $showIslandRisk) {
+            RiskScreen(title: "高风险：灵动岛布局", detail: "参考 BQTool 修改 Dynamic Island 与 ArtworkDeviceSubType。iPhone 18 Pro 专用值尚未核实，本选项使用已知 16 Pro 布局值 2622 试验；可能错位、遮挡状态栏或影响 Face ID。写入前会备份；重启或 respring 后观察。", action: "我了解风险，继续写入") {
+                showIslandRisk = false
+                runIsland()
+            } cancel: { showIslandRisk = false }
+        }
+        .fullScreenCover(isPresented: $showEditorRisk) {
+            RiskScreen(title: "高风险：字段编辑器", detail: "此页面可直接新增、删除和改写 MobileGestalt 的 CacheExtra 字段。错误的键、类型或值可能导致系统功能失效、循环重启，甚至需要恢复设备。请先备份整机；每次写入前仍会再次确认。", action: "我了解风险，进入编辑器") {
+                showEditorRisk = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showEditor = true }
+            } cancel: { showEditorRisk = false }
+        }
+        .fullScreenCover(isPresented: $showPresetsRisk) {
+            RiskScreen(title: "高风险：预设修改", detail: "预设会直接改写 MobileGestalt 字段。某些开关可能影响显示、充电、设备身份或系统稳定性；未经当前设备验证。请先备份整机；应用时会再次确认。", action: "我了解风险，进入预设") {
+                showPresetsRisk = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showPresets = true }
+            } cancel: { showPresetsRisk = false }
+        }
+        .sheet(isPresented: $showEditor) { GestaltEditorView() }
+        .sheet(isPresented: $showPresets) { PresetsView() }
+        .sheet(isPresented: $showAbout) { AboutView().presentationDetents([.medium]) }
         .alert("恢复 MobileGestalt 备份", isPresented: $showRestoreConfirm) {
             Button("恢复所示备份", role: .destructive) {
                 guard let restoreURL else { return }
@@ -159,6 +231,7 @@ struct ContentView: View {
                 busy = false
                 success = result.0
                 status = result.1
+                TapSound.play(result.0 ? .success : .failure)
             }
         }
     }
@@ -171,12 +244,21 @@ struct ContentView: View {
                 busy = false
                 success = result.0
                 status = result.1
+                TapSound.play(result.0 ? .success : .failure)
             }
+        }
+    }
+    private func runIsland() {
+        busy = true
+        status = "正在备份并写入灵动岛字段…"
+        Task.detached {
+            let result = RegionWriter.applyIsland()
+            await MainActor.run { busy = false; success = result.0; status = result.1; TapSound.play(result.0 ? .success : .failure) }
         }
     }
 }
 
-nonisolated private enum RegionWriter {
+nonisolated enum RegionWriter {
     struct SpoofProfile: Identifiable, Sendable {
         let name: String
         let product: String
@@ -199,6 +281,14 @@ nonisolated private enum RegionWriter {
         .init(name: "iPhone Air", product: "iPhone18,4", board: "D23AP", cpu: "t8150", regulatory: "A3260"),
         .init(name: "iPhone 17e", product: "iPhone18,5", board: "V159AP", cpu: "t8150", regulatory: "A3575")
     ]
+    static let padSpoofProfiles: [SpoofProfile] = [
+        .init(name: "iPad Pro 11 英寸 M4 Wi-Fi", product: "iPad16,3", board: "J717AP", cpu: "t8132", regulatory: "A2836"),
+        .init(name: "iPad Pro 11 英寸 M4 蜂窝", product: "iPad16,4", board: "J718AP", cpu: "t8132", regulatory: "A2837")
+    ]
+    static var isPad: Bool { deviceIdentifier().hasPrefix("iPad") }
+    static var hasSmallNotch: Bool {
+        ["iPhone14,2", "iPhone14,3", "iPhone14,4", "iPhone14,5", "iPhone14,7", "iPhone14,8"].contains(deviceIdentifier())
+    }
     private static let dir = "/private/var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches"
     private static let country = "h63QSdBCiT/z0WU6rdQv6Q"
     private static let region = "yK+xavymRGZ3xWc1tb8XDg"
@@ -214,6 +304,29 @@ nonisolated private enum RegionWriter {
         "iPhone 16 Pro Max": "A3084", "iPhone 16e": "A3212",
         "iPhone 17": "A3258", "iPhone 17 Pro": "A3256",
         "iPhone 17 Pro Max": "A3257", "iPhone 17e": "A3575", "iPhone Air": "A3260"
+    ]
+    // Each pair is the exact physical identifier and regulatory model from Apple's model list.
+    // Unknown combinations are refused instead of guessing a US model.
+    private static let padModels: [String: [String: String]] = [
+        "iPad13,4": ["A2377":"A2377"], "iPad13,5": ["A2377":"A2377"],
+        "iPad13,6": ["A2460":"A2459"], "iPad13,7": ["A2460":"A2459"],
+        "iPad13,8": ["A2378":"A2378"], "iPad13,9": ["A2378":"A2378"],
+        "iPad13,10": ["A2462":"A2461"], "iPad13,11": ["A2462":"A2461"],
+        "iPad13,16": ["A2588":"A2588"], "iPad13,17": ["A2589":"A2589", "A2591":"A2591"],
+        "iPad14,3": ["A2759":"A2759"], "iPad14,4": ["A2762":"A2761"],
+        "iPad14,5": ["A2436":"A2436"], "iPad14,6": ["A2766":"A2437"],
+        "iPad14,8": ["A2902":"A2902"], "iPad14,9": ["A2904":"A2903"],
+        "iPad14,10": ["A2898":"A2898"], "iPad14,11": ["A2900":"A2899"],
+        "iPad15,3": ["A3266":"A3266"], "iPad15,4": ["A3270":"A3267"],
+        "iPad15,5": ["A3268":"A3268"], "iPad15,6": ["A3271":"A3269"],
+        "iPad16,1": ["A2993":"A2993"], "iPad16,2": ["A2996":"A2995"],
+        "iPad16,3": ["A2836":"A2836"], "iPad16,4": ["A3006":"A2837"],
+        "iPad16,5": ["A2925":"A2925"], "iPad16,6": ["A3007":"A2926"],
+        "iPad16,8": ["A3459":"A3459"], "iPad16,9": ["A3463":"A3460"],
+        "iPad16,10": ["A3461":"A3461"], "iPad16,11": ["A3464":"A3462"],
+        "iPad17,1": ["A3357":"A3357"], "iPad17,2": ["A3359":"A3358"],
+        "iPad17,3": ["A3360":"A3360"], "iPad17,4": ["A3362":"A3361"],
+        "iPad19,1": ["A3595":"A3595"], "iPad19,2": ["A3597":"A3596"]
     ]
     private static var backupDirectory: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -298,6 +411,175 @@ nonisolated private enum RegionWriter {
         }
     }
 
+    enum EditorMutation: Sendable {
+        case remove, string(String), integer(Int), boolean(Bool), data(Data)
+        var value: Any? {
+            switch self {
+            case .remove: nil
+            case .string(let s): s
+            case .integer(let n): n
+            case .boolean(let b): b
+            case .data(let d): d
+            }
+        }
+    }
+    struct EditorField: Identifiable, Sendable {
+        let key: String
+        let type: String
+        let value: String
+        var id: String { key }
+    }
+    static func readFields() throws -> [EditorField] {
+        let handle = try accessHandle()
+        defer { worse_query_release(handle) }
+        let root = try readRoot()
+        guard let extra = root["CacheExtra"] as? [String: Any] else { throw WriteError.verify }
+        return extra.keys.sorted().map { key in
+            let value = extra[key]!
+            if let s = value as? String { return EditorField(key: key, type: "String", value: s) }
+            if let n = value as? NSNumber {
+                let bool = CFGetTypeID(n) == CFBooleanGetTypeID()
+                return EditorField(key: key, type: bool ? "Boolean" : "Integer", value: bool ? (n.boolValue ? "true" : "false") : n.stringValue)
+            }
+            if let d = value as? Data { return EditorField(key: key, type: "Data", value: d.base64EncodedString()) }
+            return EditorField(key: key, type: "Collection", value: String(describing: value))
+        }
+    }
+    static func edit(_ changes: [String: EditorMutation]) -> (Bool, String) {
+        mutate { extra in
+            var result = extra
+            for (key, change) in changes {
+                guard !key.isEmpty, key.count <= 100 else { throw WriteError.verify }
+                result[key] = change.value
+            }
+            return result
+        }
+    }
+    static func applyIsland() -> (Bool, String) {
+        guard hasSmallNotch else { return (false, "当前机型没有此实验预设") }
+        return applyIsland(subtype: 2622)
+    }
+    static func applyIsland(subtype: Int) -> (Bool, String) {
+        guard deviceIdentifier().hasPrefix("iPhone"), [2556, 2796, 2976, 2622, 2868, 2736].contains(subtype) else {
+            return (false, "当前设备或灵动岛布局值不受支持")
+        }
+        return mutate { extra in
+            var result = extra
+            var art = result["oPeik/9e8lQWMszEjbPzng"] as? [String: Any] ?? [:]
+            art["ArtworkDeviceSubType"] = subtype // BQTool's known layout values; 18 Pro's own value is unverified.
+            result["oPeik/9e8lQWMszEjbPzng"] = art
+            result["YlEtTtHlNesRBMal1CqRaA"] = true
+            return result
+        }
+    }
+    private static func accessHandle() throws -> Int64 {
+        let groups = YumEditSigningGroups() ?? []
+        guard let group = groups.first(where: { FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: $0) != nil }) else { throw AccessError.noGroup }
+        let handle = worse_query(dir, group, false, false)
+        guard handle >= 0 else { throw AccessError.exploit(handle) }
+        return handle
+    }
+    private static func readRoot() throws -> [String: Any] {
+        let url = URL(fileURLWithPath: dir).appendingPathComponent("com.apple.MobileGestalt.plist")
+        guard let root = try PropertyListSerialization.propertyList(from: Data(contentsOf: url), format: nil) as? [String: Any] else { throw WriteError.verify }
+        return root
+    }
+    private enum AccessError: LocalizedError {
+        case noGroup, exploit(Int64)
+        var errorDescription: String? {
+            switch self {
+            case .noGroup: "签名没有可用 App Group"
+            case .exploit(let code): "无法访问 MobileGestalt（错误码：\(code)）"
+            }
+        }
+    }
+    private static func mutate(_ transform: ([String: Any]) throws -> [String: Any]) -> (Bool, String) {
+        mutateRoot { root in
+            var result = root
+            guard let extra = root["CacheExtra"] as? [String: Any] else { throw WriteError.verify }
+            result["CacheExtra"] = try transform(extra)
+            return result
+        }
+    }
+    static func applyIPadOSMode() -> (Bool, String) {
+        guard deviceIdentifier().hasPrefix("iPhone") else { return (false, "iPadOS 模式仅用于 iPhone 实验") }
+        return mutateRoot { root in
+            guard let cacheData = root["CacheData"] as? Data,
+                  var extra = root["CacheExtra"] as? [String: Any] else { throw WriteError.verify }
+            var result = root
+            result["CacheData"] = try patchIPadOSCacheData(cacheData)
+            for key in ["mG0AnH/Vy1veoqoLRAIgTA", "UCG5MkVahJxG1YULbbd5Bg", "ZYqko/XM5zD3XBfN5RmaXA", "nVh/gwNpy7Jv1NOk00CMrw", "uKc7FPnEO++lVhHWHFlGbQ"] {
+                extra[key] = 1
+            }
+            result["CacheExtra"] = extra
+            return result
+        }
+    }
+    private static func patchIPadOSCacheData(_ data: Data) throws -> Data {
+        let hex = data.map { String(format: "%02x", $0) }.joined()
+        guard hex.utf16.count > 1616 else { throw PatchError.marker }
+        let ns = hex as NSString
+        let slice = ns.substring(with: NSRange(location: 1616, length: min(200, ns.length - 1616)))
+        let regex = try NSRegularExpression(pattern: "0+(?:5555)*([0-9a-f]{4})")
+        var marker: Int?
+        for match in regex.matches(in: slice, range: NSRange(location: 0, length: (slice as NSString).length)) {
+            let range = match.range(at: 1)
+            guard range.location != NSNotFound else { continue }
+            let value = (slice as NSString).substring(with: range)
+            if value.filter({ $0 != "0" }).count >= 3 { marker = 1616 + range.location; break }
+        }
+        guard let marker else { throw PatchError.marker }
+        let left = marker - 67, right = marker + 13
+        guard left > 0, right < ns.length - 1 else { throw PatchError.marker }
+        for p in [left, right] {
+            guard ["1", "3"].contains(ns.substring(with: NSRange(location: p, length: 1))),
+                  ns.substring(with: NSRange(location: p - 1, length: 1)) == "0",
+                  ns.substring(with: NSRange(location: p + 1, length: 1)) == "0" else { throw PatchError.marker }
+        }
+        let patched = (hex as NSString).replacingCharacters(in: NSRange(location: left, length: 1), with: "3")
+        let chars = Array(patched.utf8)
+        guard chars.count == data.count * 2 else { throw PatchError.marker }
+        var bytes = Data(capacity: data.count)
+        for i in stride(from: 0, to: chars.count, by: 2) {
+            guard let byte = UInt8(String(decoding: chars[i...i+1], as: UTF8.self), radix: 16) else { throw PatchError.marker }
+            bytes.append(byte)
+        }
+        return bytes
+    }
+    private enum PatchError: LocalizedError {
+        case marker
+        var errorDescription: String? { "未找到或无法验证 iPadOS CacheData 标记，未写入" }
+    }
+    private static func mutateRoot(_ transform: ([String: Any]) throws -> [String: Any]) -> (Bool, String) {
+        do {
+            let handle = try accessHandle()
+            defer { worse_query_release(handle) }
+            let target = URL(fileURLWithPath: dir).appendingPathComponent("com.apple.MobileGestalt.plist")
+            let original = try Data(contentsOf: target)
+            guard let root = try PropertyListSerialization.propertyList(from: original, format: nil) as? [String: Any] else { throw WriteError.verify }
+            let changed = try transform(root)
+            let modified = try PropertyListSerialization.data(fromPropertyList: changed, format: .binary, options: 0)
+            if modified == original { return (true, "字段没有变化，无需写入") }
+            try FileManager.default.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+            let backup = backupDirectory.appendingPathComponent("MobileGestalt-\(UUID().uuidString).plist")
+            try original.write(to: backup, options: .atomic)
+            guard try Data(contentsOf: backup) == original else { throw WriteError.verify }
+            do {
+                try overwriteInPlace(modified, at: target)
+                guard try Data(contentsOf: target) == modified else { throw WriteError.verify }
+            } catch {
+                do {
+                    try overwriteInPlace(original, at: target)
+                    guard try Data(contentsOf: target) == original else { throw WriteError.restore }
+                    return (false, "写入失败；已恢复并校验操作前缓存。备份：\(backup.lastPathComponent)。\(error.localizedDescription)")
+                } catch {
+                    return (false, "严重错误：写入与回滚均未通过校验。请勿重启，使用 \(backup.lastPathComponent) 手动恢复。")
+                }
+            }
+            return (true, "已原位写入并校验。操作前备份：\(backup.lastPathComponent)。请 respring 或重启。")
+        } catch { return (false, "操作失败：\(error.localizedDescription)") }
+    }
+
     enum RestoreError: LocalizedError {
         case noBackup, invalidBackup
         var errorDescription: String? {
@@ -329,9 +611,11 @@ nonisolated private enum RegionWriter {
             let family = Int(machine.dropFirst(6).prefix(while: { $0.isNumber })) ?? 0
             let nameKeys = ["Z/dqyWS6OZTRy10UcmUAhw", "bbtR9jQx50Fv5Af/affNtA"]
             let name = nameKeys.compactMap { extra[$0] as? String }.first { names[$0] != nil }
-            let nativeModel = products[machine] ?? (family >= 18 ? name.flatMap({ names[$0] }) : nil)
-            let oldDevice = experimental && nativeModel == nil && (12...17).contains(family)
-            guard let spoof = spoofProfiles.first(where: { $0.product == spoofProduct }) else {
+            let pad = machine.hasPrefix("iPad")
+            let nativeModel = pad ? padModels[machine]?[extra[regulatory] as? String ?? ""]
+                : (products[machine] ?? (family >= 18 ? name.flatMap({ names[$0] }) : nil))
+            let oldDevice = experimental && nativeModel == nil && (pad || (12...17).contains(family))
+            guard let spoof = (pad ? padSpoofProfiles : spoofProfiles).first(where: { $0.product == spoofProduct }) else {
                 return (false, "未知伪装机型，未写入")
             }
             guard let model = oldDevice ? spoof.regulatory : nativeModel else {
