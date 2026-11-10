@@ -627,6 +627,113 @@ nonisolated enum RegionWriter {
         }
     }
     private static let iPadOSModeKeys = ["mG0AnH/Vy1veoqoLRAIgTA", "UCG5MkVahJxG1YULbbd5Bg", "ZYqko/XM5zD3XBfN5RmaXA", "nVh/gwNpy7Jv1NOk00CMrw", "uKc7FPnEO++lVhHWHFlGbQ"]
+    private static let externalStageManagerKey = "qeaj75wk3HF4DwQ8qbIi7g"
+    private static let externalIPadAppsKey = "9MZ5AdH43csAUajl/dU+IQ"
+    private static var externalDisplayBaselineURL: URL {
+        backupDirectory.appendingPathComponent("ExternalDisplayBaseline-\(deviceIdentifier()).plist")
+    }
+    static var hasExternalDisplayBaseline: Bool {
+        FileManager.default.fileExists(atPath: externalDisplayBaselineURL.path)
+    }
+    private static func externalDisplayCandidateValues() -> [String: Any] {
+        var values: [String: Any] = [
+            externalStageManagerKey: 1,
+            externalIPadAppsKey: [1, 2]
+        ]
+        for key in iPadOSModeKeys { values[key] = 1 }
+        return values
+    }
+    private static func externalDisplayEligible() -> Bool {
+        deviceIdentifier().hasPrefix("iPhone") && ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 27
+    }
+    static func applyExternalDisplayCandidate() -> (Bool, String) {
+        guard externalDisplayEligible() else { return (false, "外接屏实验仅支持 iOS 27 及以上的 iPhone") }
+        let outcome = mutateRoot { root in
+            guard var extra = root["CacheExtra"] as? [String: Any], root["CacheData"] is Data else { throw WriteError.verify }
+            try FileManager.default.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+            let baseline = externalDisplayBaselineURL
+            if !FileManager.default.fileExists(atPath: baseline.path) {
+                let bytes = try PropertyListSerialization.data(fromPropertyList: root, format: .binary, options: 0)
+                try bytes.write(to: baseline, options: .atomic)
+                guard try Data(contentsOf: baseline) == bytes else { throw WriteError.verify }
+            }
+            for (key, value) in externalDisplayCandidateValues() { extra[key] = value }
+            var result = root
+            result["CacheExtra"] = extra
+            return result
+        }
+        return outcome.0
+            ? (true, "候选字段已写入并校验。重启后连接外接屏测试；目前没有证明扩展桌面已启用。原始状态另存为 ExternalDisplayBaseline。")
+            : outcome
+    }
+    static func applyExternalDisplayDeviceClass() -> (Bool, String) {
+        guard externalDisplayEligible() else { return (false, "外接屏实验仅支持 iOS 27 及以上的 iPhone") }
+        guard hasExternalDisplayBaseline else { return (false, "请先执行候选字段阶段，保存实验前基线") }
+        let outcome = mutateRoot { root in
+            guard let data = root["CacheData"] as? Data,
+                  let extra = root["CacheExtra"] as? [String: Any] else { throw WriteError.verify }
+            for (key, value) in externalDisplayCandidateValues() {
+                guard propertyListValuesEqual(extra[key], value) else { throw ExternalDisplayError.candidateChanged }
+            }
+            var result = root
+            result["CacheData"] = try patchIPadOSCacheData(data)
+            return result
+        }
+        return outcome.0
+            ? (true, "iPadOS 设备类别已写入并校验。重启后测试外接屏与音频、麦克风、电话和相机；扩展桌面不保证成功。")
+            : outcome
+    }
+    static func restoreExternalDisplayBaseline() -> (Bool, String) {
+        guard deviceIdentifier().hasPrefix("iPhone") else { return (false, "外接屏实验恢复仅支持 iPhone") }
+        let baselineURL = externalDisplayBaselineURL
+        guard let bytes = try? Data(contentsOf: baselineURL),
+              let baseline = try? PropertyListSerialization.propertyList(from: bytes, format: nil) as? [String: Any],
+              let originalExtra = baseline["CacheExtra"] as? [String: Any],
+              let originalData = baseline["CacheData"] as? Data else {
+            return (false, "找不到本机外接屏实验基线；请从 GestaltBackups 选择同一设备的完整备份恢复")
+        }
+        let outcome = mutateRoot { root in
+            guard var extra = root["CacheExtra"] as? [String: Any],
+                  let currentData = root["CacheData"] as? Data else { throw WriteError.verify }
+            let candidate = externalDisplayCandidateValues()
+            for (key, value) in candidate {
+                guard propertyListValuesEqual(extra[key], value) || propertyListValuesEqual(extra[key], originalExtra[key]) else {
+                    throw ExternalDisplayError.candidateChanged
+                }
+            }
+            if currentData != originalData {
+                guard let patched = try? patchIPadOSCacheData(originalData), currentData == patched else {
+                    throw ExternalDisplayError.cacheChanged
+                }
+            }
+            for key in candidate.keys { extra[key] = originalExtra[key] }
+            var result = root
+            result["CacheExtra"] = extra
+            result["CacheData"] = originalData
+            return result
+        }
+        if outcome.0 {
+            try? FileManager.default.removeItem(at: baselineURL)
+            return (true, "已恢复外接屏实验前的相关字段与设备类别，并保留其他当前修改。请重启设备。")
+        }
+        return outcome
+    }
+    private static func propertyListValuesEqual(_ lhs: Any?, _ rhs: Any?) -> Bool {
+        switch (lhs, rhs) {
+        case (nil, nil): return true
+        case (let a?, let b?): return NSDictionary(dictionary: ["value": a]).isEqual(to: ["value": b])
+        default: return false
+        }
+    }
+    private enum ExternalDisplayError: LocalizedError {
+        case candidateChanged, cacheChanged
+        var errorDescription: String? {
+            switch self {
+            case .candidateChanged: "外接屏实验字段已被其他操作改动；为避免覆盖，已拒绝写入或恢复"
+            case .cacheChanged: "CacheData 与实验前基线不匹配；已拒绝覆盖，请使用完整备份检查"
+            }
+        }
+    }
     static func disableIPadOSMode() -> (Bool, String) {
         guard deviceIdentifier().hasPrefix("iPhone") else { return (false, "iPadOS 模式恢复仅用于 iPhone") }
         return mutateRoot { root in
