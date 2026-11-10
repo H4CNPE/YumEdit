@@ -11,7 +11,7 @@
 - 按钮有应用内合成的轻触音效。
 - 未知型号或区域字段异常时拒绝写入。新型号需核实对应美版监管型号后才能加入映射。
 - iPad 原生模式：仅对 Apple 官方型号表与实际 `hw.machine` 双重匹配的 M1 及更新款 iPad 和 A17 Pro / A20 Pro iPad mini 改区域。中国大陆专有蜂窝型号映射到同系列非中国大陆蜂窝型号；Wi-Fi 型号保留原监管型号。未知组合拒绝写入。旧 iPad 的实验模式仅提供已核实的 11 英寸 iPad Pro M4 Wi-Fi / 蜂窝伪装预设，并设置 SiriMode=2；可能影响系统功能。
-- iPhone 13 / 14 小刘海机型增加灵动岛布局试验。使用 BQTool 已知的 `Dynamic Island` 与 `ArtworkDeviceSubType=2622` 逻辑；**这不是经核实的 iPhone 18 Pro 专用值**，不保证 18 Pro 小灵动岛外观。
+- iPhone 13 / 14 小刘海机型增加灵动岛布局试验。使用 BQTool 已知的 `Dynamic Island` 与 `ArtworkDeviceSubType=2622` 逻辑
 - 二级 MobileGestalt 字段编辑器可查看、暂存并直接应用 `CacheExtra` 的 String、Integer、Boolean、Data 字段；集合类型只读。写入前全屏红色警告，自动备份和读回校验。编辑页提供实验性 Respring；它参考 Gester/BQTool 的 NeoSpring WebKit 方法，可能关闭打开的 App，效果不保证。
 - 1.1.0 增加多种独立合成的点击、确认、警告、成功与失败音效。
 - 1.1.0 的字段编辑与 BQTool 风格预设分别从主页面小按钮进入，进入前均有全屏红色警告，真正写入前再次确认。预设涵盖 AOD、开机音、充电上限、台前调度、Apple Pencil、操作按钮、车祸检测、版本伪装、AI、Siri 美区、研究设备、展示模式及已知灵动岛布局。iPadOS 模式单独修改二进制 `CacheData` 并验证标记，校验失败时拒绝写入；它有额外的全屏红色警告。
