@@ -11,6 +11,13 @@
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleShortVersionString</key><string>$(MARKETING_VERSION)</string>
     <key>CFBundleVersion</key><string>$(CURRENT_PROJECT_VERSION)</string>
+    <key>UIApplicationShortcutItems</key><array>
+        <dict>
+            <key>UIApplicationShortcutItemType</key><string>com.hyumpix.yumedit.respring</string>
+            <key>UIApplicationShortcutItemTitle</key><string>Respring</string>
+            <key>UIApplicationShortcutItemSubtitle</key><string>重启 SpringBoard</string>
+        </dict>
+    </array>
     <key>LSRequiresIPhoneOS</key><true/>
     <key>MinimumOSVersion</key><string>26.0</string>
     <key>UIFileSharingEnabled</key><true/>

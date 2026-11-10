@@ -37,6 +37,9 @@ struct PresetsView: View {
     @State private var showApplyRisk = false
     @State private var showIslandRisk = false
     @State private var showIPadOSRisk = false
+    @State private var showDisableIPadOSRisk = false
+    @State private var showRespringRisk = false
+    @State private var respringActive = false
     private let islandOptions = [
         ("14 / 15 Pro · 2556", 2556), ("14 Pro Max · 2796", 2796),
         ("15 Pro Max / 17 · 2976", 2976), ("16 / 17 Pro · 2622", 2622),
@@ -47,7 +50,7 @@ struct PresetsView: View {
         NavigationStack {
             List {
                 Section {
-                    Text(status).font(.footnote).foregroundStyle(.secondary)
+                    Text(YumLocalization.text(status)).font(.footnote).foregroundStyle(.secondary)
                     Text("预设来自 BQTool 的公开字段表。开关只暂存变更，点击应用后才写入。关闭预设会移除对应键；若需回到精确原值，请用 plist 备份恢复。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
@@ -89,6 +92,8 @@ struct PresetsView: View {
                         Picker("设备布局", selection: $subtype) {
                             ForEach(islandOptions, id: \.1) { option in Text(option.0).tag(option.1) }
                         }
+                        .simultaneousGesture(TapGesture().onEnded { TapSound.play() })
+                        .onChange(of: subtype) { _, _ in TapSound.play(.confirm) }
                         Button("应用所选灵动岛布局") { TapSound.play(.warning); showIslandRisk = true }
                             .disabled(busy)
                         Text("iPhone 18 Pro 专用值未核实；以上仅为 BQTool 已知布局。")
@@ -97,13 +102,17 @@ struct PresetsView: View {
                     Section("iPadOS 模式 · 极高风险") {
                         Button("实验：启用 iPadOS 模式") { TapSound.play(.warning); showIPadOSRisk = true }
                             .disabled(busy)
+                        Button("关闭 iPadOS 模式", role: .destructive) { TapSound.play(.warning); showDisableIPadOSRisk = true }
+                            .disabled(busy)
                         Text("此项目会修改二进制 CacheData，标记校验失败时拒绝写入。请保留完整备份。")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Section {
-                    Button("应用暂存修改（\(pending.count) 个字段）") { TapSound.play(.warning); showApplyRisk = true }
+                    Button(YumLocalization.text("应用暂存修改（\(pending.count) 个字段）")) { TapSound.play(.warning); showApplyRisk = true }
                         .disabled(pending.isEmpty || busy)
+                    Button("Respring（重启 SpringBoard）") { TapSound.play(.warning); showRespringRisk = true }
+                        .disabled(busy)
                 }
             }
             .navigationTitle("预设修改")
@@ -128,6 +137,19 @@ struct PresetsView: View {
                 applyIPadOS()
             } cancel: { showIPadOSRisk = false }
         }
+        .fullScreenCover(isPresented: $showDisableIPadOSRisk) {
+            RiskScreen(title: "高风险：关闭 iPadOS 模式", detail: "只从匹配的启用前备份恢复 iPadOS CacheData 与五个能力字段；其他当前修改会保留。找不到匹配备份时会拒绝写入。请先完成整机备份。", action: "我了解风险，关闭 iPadOS 模式") {
+                showDisableIPadOSRisk = false
+                disableIPadOS()
+            } cancel: { showDisableIPadOSRisk = false }
+        }
+        .fullScreenCover(isPresented: $showRespringRisk) {
+            RiskScreen(title: "高风险：Respring", detail: "参考 BQTool 的 NeoSpring 方式触发 SpringBoard 重启。所有打开的 App 会关闭，未保存内容可能丢失；此方式在不同 iPadOS / iOS 版本上不保证成功。", action: "我了解风险，Respring") {
+                showRespringRisk = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { respringActive = true }
+            } cancel: { showRespringRisk = false }
+        }
+        .fullScreenCover(isPresented: $respringActive) { NeoSpringView() }
     }
 
     private func presetRow(_ preset: GestaltPreset) -> some View {
@@ -138,8 +160,8 @@ struct PresetsView: View {
             status = "已暂存 \(pending.count) 个字段；尚未写入"
         })) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(preset.title)
-                Text(preset.note).font(.caption).foregroundStyle(.secondary)
+                Text(YumLocalization.text(preset.title))
+                Text(YumLocalization.text(preset.note)).font(.caption).foregroundStyle(.secondary)
             }
         }
     }
@@ -188,6 +210,16 @@ struct PresetsView: View {
         busy = true
         Task.detached {
             let result = RegionWriter.applyIPadOSMode()
+            await MainActor.run {
+                busy = false; status = result.1
+                TapSound.play(result.0 ? .success : .failure)
+            }
+        }
+    }
+    private func disableIPadOS() {
+        busy = true
+        Task.detached {
+            let result = RegionWriter.disableIPadOSMode()
             await MainActor.run {
                 busy = false; status = result.1
                 TapSound.play(result.0 ? .success : .failure)

@@ -3,10 +3,10 @@ import SwiftUI
 struct AboutView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
-    private let contributors: [(name: String, handle: String, avatar: String)] = [
-        ("murkuwuwu", "murkuwuwu", "Avatar-murkuwuwu"),
-        ("HYumPiX", "HYumPiX", "Avatar-HYumPiX"),
-        ("DawnToDusk_", "DawnToDusk_", "Avatar-DawnToDusk_")
+    private let contributors: [(name: String, handle: String, avatar: String, note: String?)] = [
+        ("Murkuwuwuwu", "Murkuwuwuwu", "Avatar-murkuwuwu", "本工具使用的漏洞贡献者"),
+        ("HYumPiX", "HYumPiX", "Avatar-HYumPiX", nil),
+        ("DawnToDusk_", "DawnToDusk_", "Avatar-DawnToDusk_", nil)
     ]
 
     var body: some View {
@@ -25,6 +25,9 @@ struct AboutView: View {
                                 VStack(alignment: .leading) {
                                     Text(person.name).font(.headline)
                                     Text("@\(person.handle) · X").font(.caption).foregroundStyle(.secondary)
+                                    if let note = person.note {
+                                        Text(YumLocalization.text(note)).font(.caption2.weight(.semibold)).foregroundStyle(.cyan)
+                                    }
                                 }
                                 Spacer()
                                 Image(systemName: "arrow.up.right").foregroundStyle(.secondary)
@@ -45,7 +48,7 @@ struct AboutView: View {
                     .buttonStyle(.plain)
                     let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "未知"
                     let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "未知"
-                    Text("版本 \(version) · 构建 \(build)")
+                    Text(YumLocalization.text("版本 \(version) · 构建 \(build)"))
                         .font(.footnote).foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                 }

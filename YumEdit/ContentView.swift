@@ -8,14 +8,19 @@ private let accent2 = Color(red: 0.30, green: 0.68, blue: 1)
 private let brand = LinearGradient(colors: [accent, accent2], startPoint: .topLeading, endPoint: .bottomTrailing)
 
 struct ContentView: View {
+    @ObservedObject private var quickAction = QuickActionState.shared
     @State private var busy = false
     @State private var success = false
     @State private var experimental = false
+    @State private var europeanDevice = false
     @State private var spoofProduct = RegionWriter.isPad ? "iPad16,3" : "iPhone16,1"
     @State private var showRisk = false
+    @State private var showEuropeanRisk = false
     @State private var showIslandRisk = false
     @State private var showEditorRisk = false
     @State private var showPresetsRisk = false
+    @State private var showRespringRisk = false
+    @State private var respringActive = false
     @State private var showEditor = false
     @State private var showPresets = false
     @State private var showAbout = false
@@ -31,18 +36,18 @@ struct ContentView: View {
             RadialGradient(colors: [accent.opacity(0.33), .black], center: .topLeading, startRadius: 20, endRadius: 680).ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 24) {
-                    Image(systemName: "sparkles.rectangle.stack.fill")
-                        .font(.system(size: 44)).foregroundStyle(brand)
-                        .frame(width: 88, height: 88)
-                        .background(Color(red: 1/255, green: 26/255, blue: 92/255), in: RoundedRectangle(cornerRadius: 24))
                     VStack(spacing: 8) {
                         Text("Siri AI · US").font(.system(size: 34, weight: .bold, design: .rounded))
                         Text("一键切换美版设备区域").font(.subheadline).foregroundStyle(.white.opacity(0.65))
                     }
                     VStack(alignment: .leading, spacing: 12) {
-                        Label(success ? "缓存文件已写入并校验" : "设备状态", systemImage: success ? "checkmark.seal.fill" : "iphone.gen3")
+                        Label {
+                            Text(YumLocalization.text(success ? "缓存文件已写入并校验" : "设备状态"))
+                        } icon: {
+                            Image(systemName: success ? "checkmark.seal.fill" : "iphone.gen3")
+                        }
                             .font(.headline)
-                        Text(status).font(.subheadline).foregroundStyle(.white.opacity(0.72))
+                        Text(YumLocalization.text(status)).font(.subheadline).foregroundStyle(.white.opacity(0.72))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading).padding(20)
                     .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 22))
@@ -50,41 +55,65 @@ struct ContentView: View {
                     Toggle(isOn: $experimental) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("旧机型实验模式").font(.headline)
-                        Text("旧款 iPhone / iPad；伪装设备身份，可能导致 Face ID 或系统功能失效")
+                            Text("旧款 iPhone / iPad；伪装设备身份，可能导致 Face ID 或系统功能失效")
                                 .font(.caption).foregroundStyle(.white.opacity(0.58))
                         }
                     }
                     .tint(.red)
+                    .onChange(of: experimental) { _, enabled in
+                        TapSound.play(enabled ? .warning : .tap)
+                    }
                     .padding(20)
                     .background(Color.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 22))
+                    Toggle(isOn: $europeanDevice) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("欧洲设备修改").font(.headline)
+                            Text("仅识别已核实的欧洲销售区域与监管型号；将区域改为 LL/A")
+                                .font(.caption).foregroundStyle(.white.opacity(0.58))
+                        }
+                    }
+                    .tint(accent)
+                    .onChange(of: europeanDevice) { _, enabled in TapSound.play(enabled ? .confirm : .tap) }
+                    .padding(20)
+                    .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 22))
                     if experimental {
                         Picker("伪装机型", selection: $spoofProduct) {
                             ForEach(RegionWriter.isPad ? RegionWriter.padSpoofProfiles : RegionWriter.spoofProfiles) { profile in
-                                Text(profile.name).tag(profile.product)
+                                Text(YumLocalization.text(profile.name)).tag(profile.product)
                             }
                         }
                         .pickerStyle(.menu)
                         .tint(.white)
+                        .simultaneousGesture(TapGesture().onEnded { TapSound.play() })
+                        .onChange(of: spoofProduct) { _, _ in TapSound.play(.confirm) }
                         .padding(16)
                         .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 18))
                     }
                     Button {
-                        TapSound.play()
                         if experimental {
                             TapSound.play(.warning)
                             showRisk = true
                             return
                         }
+                        if europeanDevice {
+                            TapSound.play(.warning)
+                            showEuropeanRisk = true
+                            return
+                        }
+                        TapSound.play()
                         run()
                     } label: {
-                        Label(busy ? "处理中…" : "强制开启 Siri AI", systemImage: "sparkles")
+                        Label {
+                            Text(YumLocalization.text(busy ? "处理中…" : "强制开启 Siri AI"))
+                        } icon: {
+                            Image(systemName: "sparkles")
+                        }
                             .font(.headline).frame(maxWidth: .infinity).padding(.vertical, 18)
                             .background(brand, in: RoundedRectangle(cornerRadius: 18))
                     }
                     .buttonStyle(.plain).disabled(busy)
                     if RegionWriter.hasSmallNotch {
                         Button {
-                            TapSound.play()
                             TapSound.play(.warning)
                             showIslandRisk = true
                         } label: {
@@ -95,7 +124,8 @@ struct ContentView: View {
                         }
                         .buttonStyle(.plain).disabled(busy)
                     }
-                    Button {
+                    HStack(spacing: 10) {
+                        Button {
                         TapSound.play()
                         do {
                             let candidate = try RegionWriter.latestBackup()
@@ -103,18 +133,43 @@ struct ContentView: View {
                             restoreDescription = candidate.description
                             showRestoreConfirm = true
                         } catch RegionWriter.RestoreError.noBackup {
+                            TapSound.play(.warning)
                             showImportPicker = true
                         } catch {
                             success = false
                             status = "无法准备恢复：\(error.localizedDescription)"
+                            TapSound.play(.failure)
                         }
-                    } label: {
+                        } label: {
                         Label("恢复最近一次 plist 备份", systemImage: "arrow.uturn.backward")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity).padding(.vertical, 14)
+                            .font(.footnote.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 52)
                             .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+                        }
+                        .buttonStyle(.plain).disabled(busy)
+                        .contextMenu {
+                        Button {
+                            guard !busy else { return }
+                            TapSound.play(.warning)
+                            showImportPicker = true
+                        } label: {
+                            Label("从「文件」选择 plist", systemImage: "doc.badge.arrow.up")
+                        }
+                        }
+                        Button {
+                        TapSound.play(.warning)
+                        showRespringRisk = true
+                        } label: {
+                        Label("Respring", systemImage: "arrow.clockwise")
+                            .font(.footnote.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 52)
+                            .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+                        }
+                        .accessibilityLabel("Respring（重启 SpringBoard）")
+                        .buttonStyle(.plain).disabled(busy)
                     }
-                    .buttonStyle(.plain).disabled(busy)
+                    Text("长按恢复按钮，可从「文件」选择同一设备的 MobileGestalt plist。")
+                        .font(.caption).foregroundStyle(.white.opacity(0.5))
                     HStack(spacing: 10) {
                         Button {
                             TapSound.play(.warning)
@@ -147,29 +202,33 @@ struct ContentView: View {
                     .accessibilityLabel("贡献者与仓库")
                     .buttonStyle(.plain)
                 }
-                .foregroundStyle(.white).padding(.horizontal, 24).padding(.top, 56)
+                .foregroundStyle(.white).padding(.horizontal, 24).padding(.top, 32)
                 .frame(maxWidth: 600).frame(maxWidth: .infinity).padding(.bottom, 40)
             }
         }
         .fullScreenCover(isPresented: $showRisk) {
             ZStack {
                 Color(red: 0.34, green: 0.02, blue: 0.04).ignoresSafeArea()
-                VStack(spacing: 22) {
-                    Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 70))
-                    Text("高风险：设备身份伪装").font(.largeTitle.bold()).multilineTextAlignment(.center)
-                    Text("将产品、硬件与 CPU 型号伪装为 \((RegionWriter.isPad ? RegionWriter.padSpoofProfiles : RegionWriter.spoofProfiles).first(where: { $0.product == spoofProduct })?.name ?? "所选机型")，并把 SiriMode 设为 2。可能暂时破坏 Face ID、导致系统不稳定或循环重启，甚至需要恢复设备。效果未经验证。")
-                        .font(.body).multilineTextAlignment(.center)
-                    Button("我了解风险，继续写入") {
-                        TapSound.play(.confirm)
-                        showRisk = false
-                        run()
+                ScrollView {
+                    VStack(spacing: 22) {
+                        Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 70))
+                        Text("高风险：设备身份伪装").font(.largeTitle.bold()).multilineTextAlignment(.center)
+                        Text(YumLocalization.text("将产品、硬件与 CPU 型号伪装为所选机型，并把 SiriMode 设为 2。可能暂时破坏 Face ID、导致系统不稳定或循环重启，甚至需要恢复设备。效果未经验证。"))
+                            .font(.body).multilineTextAlignment(.center)
+                        Text((RegionWriter.isPad ? RegionWriter.padSpoofProfiles : RegionWriter.spoofProfiles).first(where: { $0.product == spoofProduct })?.name ?? "")
+                            .font(.headline)
+                        Button("我了解风险，继续写入") {
+                            TapSound.play(.confirm)
+                            showRisk = false
+                            run()
+                        }
+                        .font(.headline).padding(18).frame(maxWidth: .infinity)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 16))
+                        .foregroundStyle(.red)
+                        Button("取消") { TapSound.play(); showRisk = false }.foregroundStyle(.white)
                     }
-                    .font(.headline).padding(18).frame(maxWidth: .infinity)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 16))
-                    .foregroundStyle(.red)
-                    Button("取消") { TapSound.play(); showRisk = false }.foregroundStyle(.white)
+                    .padding(28).frame(maxWidth: 600).frame(maxWidth: .infinity)
                 }
-                .padding(28).frame(maxWidth: 600)
             }
         }
         .fullScreenCover(isPresented: $showIslandRisk) {
@@ -177,6 +236,12 @@ struct ContentView: View {
                 showIslandRisk = false
                 runIsland()
             } cancel: { showIslandRisk = false }
+        }
+        .fullScreenCover(isPresented: $showEuropeanRisk) {
+            RiskScreen(title: "高风险：欧洲设备区域修改", detail: "仅接受已知欧洲销售代码与匹配的监管型号。写入将把销售区域改为 LL/A，并为已知机型写入对应美版监管型号。修改设备身份可能影响系统功能；请先备份。", action: "我了解风险，继续写入") {
+                showEuropeanRisk = false
+                run()
+            } cancel: { showEuropeanRisk = false }
         }
         .fullScreenCover(isPresented: $showEditorRisk) {
             RiskScreen(title: "高风险：字段编辑器", detail: "此页面可直接新增、删除和改写 MobileGestalt 的 CacheExtra 字段。错误的键、类型或值可能导致系统功能失效、循环重启，甚至需要恢复设备。请先备份整机；每次写入前仍会再次确认。", action: "我了解风险，进入编辑器") {
@@ -190,17 +255,25 @@ struct ContentView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showPresets = true }
             } cancel: { showPresetsRisk = false }
         }
+        .fullScreenCover(isPresented: $showRespringRisk) {
+            RiskScreen(title: "高风险：Respring", detail: "参考 BQTool 的 NeoSpring 方式触发 SpringBoard 重启。所有打开的 App 会关闭，未保存内容可能丢失；此方式在不同 iPadOS / iOS 版本上不保证成功。", action: "我了解风险，Respring") {
+                showRespringRisk = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { respringActive = true }
+            } cancel: { showRespringRisk = false }
+        }
+        .fullScreenCover(isPresented: $respringActive) { NeoSpringView() }
         .sheet(isPresented: $showEditor) { GestaltEditorView() }
         .sheet(isPresented: $showPresets) { PresetsView() }
         .sheet(isPresented: $showAbout) { AboutView().presentationDetents([.medium]) }
         .alert("恢复 MobileGestalt 备份", isPresented: $showRestoreConfirm) {
             Button("恢复所示备份", role: .destructive) {
                 guard let restoreURL else { return }
+                TapSound.play(.confirm)
                 runRestore(restoreURL)
             }
-            Button("取消", role: .cancel) { }
+            Button("取消", role: .cancel) { TapSound.play() }
         } message: {
-            Text("\(restoreDescription)\n\n此备份可能已被其他工具修改；只会恢复为文件内的状态。当前缓存会另存为 PreRestore 备份。恢复后需重启。")
+            Text(restoreDescription + "\n\n" + YumLocalization.text("仅恢复同一设备的 plist。文件可能已被其他工具修改；恢复结果取决于文件内容。当前缓存会另存为 PreRestore 备份。恢复后需重启。"))
         }
         .fileImporter(isPresented: $showImportPicker, allowedContentTypes: [.item]) { result in
             do {
@@ -211,22 +284,37 @@ struct ContentView: View {
                 restoreURL = candidate.url
                 restoreDescription = candidate.description
                 showRestoreConfirm = true
+                TapSound.play(.confirm)
             } catch {
+                let nsError = error as NSError
+                if nsError.domain == NSCocoaErrorDomain && nsError.code == NSUserCancelledError { return }
                 success = false
                 status = "导入备份失败：\(error.localizedDescription)"
+                TapSound.play(.failure)
             }
         }
-        .onAppear { TapSound.prepare() }
+        .onAppear {
+            TapSound.prepare()
+            presentRespringShortcutIfNeeded()
+        }
+        .onChange(of: quickAction.respringRequested) { _, _ in presentRespringShortcutIfNeeded() }
         .preferredColorScheme(.dark)
+    }
+
+    private func presentRespringShortcutIfNeeded() {
+        guard quickAction.respringRequested else { return }
+        quickAction.respringRequested = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showRespringRisk = true }
     }
 
     private func run() {
         busy = true
         status = "正在备份、写入并校验…"
         let oldDevice = experimental
+        let useEuropeanRegion = europeanDevice
         let selectedSpoof = spoofProduct
         Task.detached {
-            let result = RegionWriter.apply(experimental: oldDevice, spoofProduct: selectedSpoof)
+            let result = RegionWriter.apply(experimental: oldDevice, spoofProduct: selectedSpoof, european: useEuropeanRegion)
             await MainActor.run {
                 busy = false
                 success = result.0
@@ -293,17 +381,40 @@ nonisolated enum RegionWriter {
     private static let country = "h63QSdBCiT/z0WU6rdQv6Q"
     private static let region = "yK+xavymRGZ3xWc1tb8XDg"
     private static let regulatory = "97JDvERpVwO+GHtthIh7hA"
+    // Sales suffixes reported for European markets. Require both fields to match exactly.
+    private static let europeanSalesCodes: Set<String> = [
+        "B", "CZ", "D", "DN", "EE", "FB", "FD", "GR", "IP", "KN", "KS",
+        "MG", "NF", "PL", "PO", "RO", "SL", "T", "TY", "ZD"
+    ]
+    // Apple lists these as the "other countries and regions" regulatory models.
+    private static let europeanIPhoneModels: [String: String] = [
+        "iPhone12,1": "A2221", "iPhone12,3": "A2215", "iPhone12,5": "A2218", "iPhone12,8": "A2296",
+        "iPhone13,1": "A2399", "iPhone13,2": "A2403", "iPhone13,3": "A2407", "iPhone13,4": "A2411",
+        "iPhone14,2": "A2638", "iPhone14,3": "A2643", "iPhone14,4": "A2628", "iPhone14,5": "A2633",
+        "iPhone14,6": "A2783", "iPhone14,7": "A2882", "iPhone14,8": "A2886",
+        "iPhone15,2": "A2890", "iPhone15,3": "A2894", "iPhone15,4": "A3090", "iPhone15,5": "A3094",
+        "iPhone16,1": "A3102", "iPhone16,2": "A3106",
+        "iPhone17,1": "A3293", "iPhone17,2": "A3296",
+        "iPhone17,3": "A3287", "iPhone17,4": "A3290", "iPhone17,5": "A3409",
+        "iPhone18,1": "A3523", "iPhone18,2": "A3526", "iPhone18,3": "A3520",
+        "iPhone18,4": "A3517", "iPhone18,5": "A3634",
+        "iPhone19,4": "A3720"
+    ]
     private static let products: [String: String] = [
         "iPhone16,1": "A2848", "iPhone16,2": "A2849",
-        "iPhone17,1": "A3083", "iPhone17,2": "A3084",
-        "iPhone17,3": "A3081", "iPhone17,4": "A3082", "iPhone17,5": "A3212"
+        "iPhone17,1": "A3083", "iPhone17,2": "A3084", "iPhone17,3": "A3081",
+        "iPhone17,4": "A3082", "iPhone17,5": "A3212",
+        "iPhone18,1": "A3256", "iPhone18,2": "A3257", "iPhone18,3": "A3258",
+        "iPhone18,4": "A3260", "iPhone18,5": "A3575",
+        "iPhone19,4": "A3447"
     ]
     private static let names: [String: String] = [
         "iPhone 15 Pro": "A2848", "iPhone 15 Pro Max": "A2849",
         "iPhone 16": "A3081", "iPhone 16 Plus": "A3082", "iPhone 16 Pro": "A3083",
         "iPhone 16 Pro Max": "A3084", "iPhone 16e": "A3212",
         "iPhone 17": "A3258", "iPhone 17 Pro": "A3256",
-        "iPhone 17 Pro Max": "A3257", "iPhone 17e": "A3575", "iPhone Air": "A3260"
+        "iPhone 17 Pro Max": "A3257", "iPhone 17e": "A3575", "iPhone Air": "A3260",
+        "iPhone Duo": "A3447"
     ]
     // Each pair is the exact physical identifier and regulatory model from Apple's model list.
     // Unknown combinations are refused instead of guessing a US model.
@@ -354,7 +465,7 @@ nonisolated enum RegionWriter {
               let extra = root["CacheExtra"] as? [String: Any] else { throw RestoreError.invalidBackup }
         let area = extra[region] as? String ?? "未知区域"
         let model = extra[regulatory] as? String ?? "未知型号"
-        return BackupChoice(url: url, description: "文件：\(url.lastPathComponent)\n备份内容：\(area)、\(model)")
+        return BackupChoice(url: url, description: "\(url.lastPathComponent)\n\(area) · \(model)")
     }
 
     static func importBackup(from source: URL) throws -> BackupChoice {
@@ -368,7 +479,7 @@ nonisolated enum RegionWriter {
         let stored = backupDirectory.appendingPathComponent("MobileGestalt-Imported-\(UUID().uuidString).plist")
         try data.write(to: stored, options: .atomic)
         guard try Data(contentsOf: stored) == data else { throw RestoreError.invalidBackup }
-        return BackupChoice(url: stored, description: "导入文件：\(source.lastPathComponent)\n备份内容：\(extra[region] as? String ?? "未知区域")、\(extra[regulatory] as? String ?? "未知型号")")
+        return BackupChoice(url: stored, description: "\(source.lastPathComponent)\n\(extra[region] as? String ?? "未知区域") · \(extra[regulatory] as? String ?? "未知型号")")
     }
 
     static func restore(from backup: URL) -> (Bool, String) {
@@ -488,8 +599,8 @@ nonisolated enum RegionWriter {
         case noGroup, exploit(Int64)
         var errorDescription: String? {
             switch self {
-            case .noGroup: "签名没有可用 App Group"
-            case .exploit(let code): "无法访问 MobileGestalt（错误码：\(code)）"
+            case .noGroup: YumLocalization.text("签名没有可用 App Group")
+            case .exploit(let code): YumLocalization.text("无法访问 MobileGestalt（错误码：\(code)）")
             }
         }
     }
@@ -513,6 +624,38 @@ nonisolated enum RegionWriter {
             }
             result["CacheExtra"] = extra
             return result
+        }
+    }
+    private static let iPadOSModeKeys = ["mG0AnH/Vy1veoqoLRAIgTA", "UCG5MkVahJxG1YULbbd5Bg", "ZYqko/XM5zD3XBfN5RmaXA", "nVh/gwNpy7Jv1NOk00CMrw", "uKc7FPnEO++lVhHWHFlGbQ"]
+    static func disableIPadOSMode() -> (Bool, String) {
+        guard deviceIdentifier().hasPrefix("iPhone") else { return (false, "iPadOS 模式恢复仅用于 iPhone") }
+        return mutateRoot { root in
+            guard let currentData = root["CacheData"] as? Data,
+                  var currentExtra = root["CacheExtra"] as? [String: Any] else { throw WriteError.verify }
+            guard FileManager.default.fileExists(atPath: backupDirectory.path) else { throw PatchError.originalBackup }
+            let files = try FileManager.default.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)
+                .filter { $0.lastPathComponent.hasPrefix("MobileGestalt-") && $0.pathExtension == "plist" }
+                .sorted {
+                    let a = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+                    let b = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+                    return a > b
+                }
+            for file in files {
+                guard let bytes = try? Data(contentsOf: file),
+                      let backup = try? PropertyListSerialization.propertyList(from: bytes, format: nil) as? [String: Any],
+                      let originalData = backup["CacheData"] as? Data,
+                      let originalExtra = backup["CacheExtra"] as? [String: Any],
+                      originalData != currentData,
+                      (try? patchIPadOSCacheData(originalData)) == currentData else { continue }
+                for key in iPadOSModeKeys {
+                    currentExtra[key] = originalExtra[key]
+                }
+                var result = root
+                result["CacheData"] = originalData
+                result["CacheExtra"] = currentExtra
+                return result
+            }
+            throw PatchError.originalBackup
         }
     }
     private static func patchIPadOSCacheData(_ data: Data) throws -> Data {
@@ -547,8 +690,13 @@ nonisolated enum RegionWriter {
         return bytes
     }
     private enum PatchError: LocalizedError {
-        case marker
-        var errorDescription: String? { "未找到或无法验证 iPadOS CacheData 标记，未写入" }
+        case marker, originalBackup
+        var errorDescription: String? {
+            switch self {
+            case .marker: YumLocalization.text("未找到或无法验证 iPadOS CacheData 标记，未写入")
+            case .originalBackup: YumLocalization.text("找不到与当前 iPadOS CacheData 匹配的启用前备份，未写入。请使用同一设备的原始 plist 完整恢复。")
+            }
+        }
     }
     private static func mutateRoot(_ transform: ([String: Any]) throws -> [String: Any]) -> (Bool, String) {
         do {
@@ -583,11 +731,11 @@ nonisolated enum RegionWriter {
     enum RestoreError: LocalizedError {
         case noBackup, invalidBackup
         var errorDescription: String? {
-            self == .noBackup ? "没有找到本 App 创建的 MobileGestalt 备份" : "最近一次备份不是有效的 MobileGestalt plist"
+            self == .noBackup ? YumLocalization.text("没有找到本 App 创建的 MobileGestalt 备份") : YumLocalization.text("最近一次备份不是有效的 MobileGestalt plist")
         }
     }
 
-    nonisolated static func apply(experimental: Bool, spoofProduct: String) -> (Bool, String) {
+    nonisolated static func apply(experimental: Bool, spoofProduct: String, european: Bool = false) -> (Bool, String) {
         let signedGroups = YumEditSigningGroups() ?? []
         guard !signedGroups.isEmpty else {
             return (false, "当前签名没有 App Group。P12 证书本身不授予此权限；请使用包含 App Group 的 provisioning profile 重新签名。")
@@ -612,7 +760,9 @@ nonisolated enum RegionWriter {
             let nameKeys = ["Z/dqyWS6OZTRy10UcmUAhw", "bbtR9jQx50Fv5Af/affNtA"]
             let name = nameKeys.compactMap { extra[$0] as? String }.first { names[$0] != nil }
             let pad = machine.hasPrefix("iPad")
-            let nativeModel = pad ? padModels[machine]?[extra[regulatory] as? String ?? ""]
+            let currentRegulatory = extra[regulatory] as? String ?? ""
+            let padMapping = padModels[machine]
+            let nativeModel = pad ? (padMapping?[currentRegulatory] ?? ((european && padMapping?.values.contains(currentRegulatory) == true) ? currentRegulatory : nil))
                 : (products[machine] ?? (family >= 18 ? name.flatMap({ names[$0] }) : nil))
             let oldDevice = experimental && nativeModel == nil && (pad || (12...17).contains(family))
             guard let spoof = (pad ? padSpoofProfiles : spoofProfiles).first(where: { $0.product == spoofProduct }) else {
@@ -625,10 +775,23 @@ nonisolated enum RegionWriter {
             if oldDevice && ProcessInfo.processInfo.operatingSystemVersion.majorVersion < 27 {
                 return (false, "SiriMode 实验字段仅在 iOS 27 及以上启用")
             }
-            guard let oldCountry = extra[country] as? String, ["CH", "LL"].contains(oldCountry),
-                  let oldRegion = extra[region] as? String, ["CH/A", "LL/A"].contains(oldRegion),
-                  extra[regulatory] is String else {
-                return (false, "区域字段不是预期的 CH/A 或 LL/A，未写入")
+            guard let oldCountry = extra[country] as? String,
+                  let oldRegion = extra[region] as? String,
+                  let oldModel = extra[regulatory] as? String else {
+                return (false, "区域或监管型号字段缺失，未写入")
+            }
+            let standardRegion = (oldCountry == "CH" && oldRegion == "CH/A") || (oldCountry == "LL" && oldRegion == "LL/A")
+            let europeanRegion = european && europeanSalesCodes.contains(oldCountry) && oldRegion == "\(oldCountry)/A"
+            guard standardRegion || europeanRegion else {
+                return (false, "销售区域代码未通过双字段校验，未写入")
+            }
+            if machine == "iPhone19,4" && standardRegion {
+                let expected = oldCountry == "CH" ? "A3721" : "A3447"
+                guard oldModel == expected else { return (false, "iPhone Duo 监管型号与销售区域不匹配，未写入") }
+            }
+            if europeanRegion {
+                let expected = pad ? (padMapping?.values.contains(oldModel) == true) : europeanIPhoneModels[machine] == oldModel
+                guard expected else { return (false, "欧洲销售区域与此机型的监管型号不匹配，未写入") }
             }
             if !oldDevice, oldCountry == "LL", oldRegion == "LL/A", extra[regulatory] as? String == model {
                 return (true, "已经是美版目标值，无需写入")
@@ -675,7 +838,7 @@ nonisolated enum RegionWriter {
                     return (false, "严重错误：写入后恢复未能校验。请勿重启，使用 GestaltBackups 中的备份恢复。\(error.localizedDescription)")
                 }
             }
-            let profileText = oldDevice ? "；伪装为 \(spoof.name)" : ""
+            let profileText = oldDevice ? " / \(spoof.name)" : ""
             return (true, "已写入 LL、LL/A、\(model)\(profileText) 并读回校验。请重启设备再检查 Siri AI；本结果只证明缓存文件已修改，不代表系统功能已启用。备份在“文件”App 的 GestaltBackups。")
         } catch {
             return (false, "操作失败：\(error.localizedDescription)。请检查 GestaltBackups。")
@@ -684,7 +847,7 @@ nonisolated enum RegionWriter {
 
     private enum WriteError: LocalizedError {
         case verify, restore
-        var errorDescription: String? { self == .verify ? "写后校验失败" : "恢复后校验失败" }
+        var errorDescription: String? { self == .verify ? YumLocalization.text("写后校验失败") : YumLocalization.text("恢复后校验失败") }
     }
     private static func overwriteInPlace(_ data: Data, at url: URL) throws {
         let fd = open(url.path, O_WRONLY | O_CLOEXEC)

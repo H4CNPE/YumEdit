@@ -11,17 +11,19 @@ struct RiskScreen: View {
     var body: some View {
         ZStack {
             Color(red: 0.34, green: 0.02, blue: 0.04).ignoresSafeArea()
-            VStack(spacing: 22) {
-                Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 70))
-                Text(title).font(.largeTitle.bold()).multilineTextAlignment(.center)
-                Text(detail).multilineTextAlignment(.center)
-                Button(action) { TapSound.play(.confirm); confirm() }
-                    .font(.headline).padding(18).frame(maxWidth: .infinity)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 16))
-                    .foregroundStyle(.red)
-                Button("取消") { TapSound.play(); cancel() }.foregroundStyle(.white)
+            ScrollView {
+                VStack(spacing: 22) {
+                    Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 70))
+                    Text(YumLocalization.text(title)).font(.largeTitle.bold()).multilineTextAlignment(.center)
+                    Text(YumLocalization.text(detail)).multilineTextAlignment(.center)
+                    Button { TapSound.play(.confirm); confirm() } label: { Text(YumLocalization.text(action)) }
+                        .font(.headline).padding(18).frame(maxWidth: .infinity)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 16))
+                        .foregroundStyle(.red)
+                    Button("取消") { TapSound.play(); cancel() }.foregroundStyle(.white)
+                }
+                .foregroundStyle(.white).padding(28).frame(maxWidth: 600).frame(maxWidth: .infinity)
             }
-            .foregroundStyle(.white).padding(28).frame(maxWidth: 600)
         }
     }
 }
@@ -45,11 +47,11 @@ struct GestaltEditorView: View {
         NavigationStack {
             List {
                 Section {
-                    Text(status).font(.footnote).foregroundStyle(.secondary)
+                    Text(YumLocalization.text(status)).font(.footnote).foregroundStyle(.secondary)
                     Text("只编辑 CacheExtra。集合类型只读。修改先暂存，确认后才写入系统缓存。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
-                Section("字段（\(fields.count)）") {
+                Section(YumLocalization.text("字段（\(fields.count)）")) {
                     ForEach(fields.filter { filter.isEmpty || $0.key.localizedCaseInsensitiveContains(filter) }) { field in
                         Button {
                             TapSound.play()
@@ -70,6 +72,8 @@ struct GestaltEditorView: View {
                     Picker("类型", selection: $valueType) {
                         ForEach(types, id: \.self) { Text($0).tag($0) }
                     }
+                    .simultaneousGesture(TapGesture().onEnded { TapSound.play() })
+                    .onChange(of: valueType) { _, _ in TapSound.play(.confirm) }
                     TextField(valueType == "Data" ? "Base64 数据" : "值", text: $value, axis: .vertical)
                         .font(.system(.body, design: .monospaced))
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
@@ -87,17 +91,18 @@ struct GestaltEditorView: View {
                         status = "已暂存 \(pending.count) 项；尚未写入设备"
                     }
                     .disabled(!fields.contains(where: { $0.key == key }))
-                    Button("清空输入") { key = ""; value = ""; valueType = "String" }
+                    Button("清空输入") { TapSound.play(); key = ""; value = ""; valueType = "String" }
                 }
                 Section("操作") {
-                    Button("应用暂存字段（\(pending.count)）") { TapSound.play(.warning); showWriteRisk = true }
+                    Button(YumLocalization.text("应用暂存字段（\(pending.count)）")) { TapSound.play(.warning); showWriteRisk = true }
                         .disabled(pending.isEmpty || busy)
                     Button("Respring（重启 SpringBoard）") { TapSound.play(.warning); showRespringRisk = true }
+                        .disabled(busy)
                 }
             }
             .searchable(text: $filter, prompt: "搜索字段键")
             .navigationTitle("MobileGestalt")
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("完成") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("完成") { TapSound.play(); dismiss() } } }
         }
         .task { load() }
         .fullScreenCover(isPresented: $showWriteRisk) {
@@ -109,7 +114,7 @@ struct GestaltEditorView: View {
         .fullScreenCover(isPresented: $showRespringRisk) {
             RiskScreen(title: "高风险：Respring", detail: "参考 BQTool 的 NeoSpring 方式触发 SpringBoard 重启。所有打开的 App 会关闭，未保存内容可能丢失；此方式在不同 iPadOS / iOS 版本上不保证成功。", action: "我了解风险，Respring") {
                 showRespringRisk = false
-                respringActive = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { respringActive = true }
             } cancel: { showRespringRisk = false }
         }
         .fullScreenCover(isPresented: $respringActive) { NeoSpringView() }
@@ -150,7 +155,7 @@ struct GestaltEditorView: View {
     }
 }
 
-private struct NeoSpringView: View {
+struct NeoSpringView: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
