@@ -281,3 +281,18 @@
 "已是目标值。请完整重启设备后检查 Apple Intelligence。" = "Ciljne vrednosti so že nastavljene. Napravo popolnoma znova zaženite in preverite Apple Intelligence.";
 "已写入 LL、LL/A、__X0__ 并读回校验。请完整重启设备后检查 Apple Intelligence；缓存写入不代表系统功能已启用。备份在“文件”App 的 GestaltBackups。" = "LL, LL/A in __X0__ so zapisani, predpomnilnik preverjen. Napravo popolnoma znova zaženite in preverite Apple Intelligence. Zapis v predpomnilnik ne dokazuje vklopa sistemske funkcije. Kopija: GestaltBackups v aplikaciji Datoteke.";
 "已完成，无需再次写入" = "Končano; ponovni zapis ni potreben";
+
+/* Two-stage older-device workflow (1.3.0) */
+"旧机型两阶段" = "Dve stopnji za starejše naprave";
+"第一阶段：临时伪装并下载资源" = "1. stopnja: začasno spremenite identiteto modela in prenesite vire";
+"第二阶段：恢复真实机型" = "2. stopnja: obnovite pravi model";
+"临时伪装机型" = "Začasno spremenjen model";
+"确认资源下载完成后，再执行第二阶段。" = "Pred začetkom 2. stopnje dokončajte prenos virov.";
+"第一阶段会临时修改产品、板号、CPU 与监管型号，可能使 Face ID 和听写暂时失效。写入前自动备份；完整重启后等待系统下载资源。不会写入生成式模型能力字段。" = "1. stopnja začasno spremeni izdelek, ploščo, CPU in regulativni model. Face ID in narekovanje lahko začasno prenehata delovati. Pred zapisovanjem se samodejno ustvari varnostna kopija. Napravo povsem znova zaženite in počakajte, da sistem prenese vire. Polje zmogljivosti generativnega modela se ne bo zapisalo.";
+"第二阶段从同设备、同 CacheData 与 CacheUUID 的历史备份恢复真实产品、板号、CPU 与原监管型号，同时保留美区和 SiriMode。找不到可信备份就拒绝写入；恢复后需完整重启并测试 Face ID、听写及 Siri AI。不会写入生成式模型能力字段。" = "2. stopnja obnovi pravi izdelek, ploščo, CPU in prvotni regulativni model iz starejše varnostne kopije iste naprave z ujemajočima se CacheData in CacheUUID. Regija ZDA in SiriMode ostaneta. Če ni zanesljive kopije, se nič ne zapiše. Nato napravo povsem znova zaženite in preverite Face ID, narekovanje in Siri AI. Polje zmogljivosti generativnega modela se ne bo zapisalo.";
+"当前仍是临时伪装机型" = "Model je še vedno začasno spremenjen";
+"当前已是真实机型" = "Pravi model je zdaj obnovljen";
+"第一阶段已写入。请完整重启并等待资源下载完成。" = "1. stopnja je zapisana. Napravo povsem znova zaženite in počakajte na prenos.";
+"第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "2. stopnja je obnovila pravo identiteto. Napravo povsem znova zaženite in preverite Face ID, narekovanje in Siri AI.";
+"旧机型请使用两阶段流程" = "Za starejše naprave uporabite dvostopenjski postopek";
+"我确认资源已下载完成" = "Potrjujem, da je prenos virov končan";

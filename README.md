@@ -4,8 +4,9 @@
 
 ## 行为
 
+- **1.3.0 旧机型两阶段试验：**在已映射的 iOS 27+ iPhone 11 至 iPhone 15/15 Plus 上，第一阶段核对真实机型与销售区域，备份后临时伪装为选定机型，写入 `LL`、`LL/A` 与 `SiriMode = 2`，完整重启并等待资源下载。用户确认下载完成后，第二阶段只从同设备、同 `CacheData` 和 `CacheUUID` 的可信历史备份恢复真实产品、板号、CPU 与原监管型号，保留当前销售区域和 SiriMode，再完整重启测试 Face ID、听写与 Apple Intelligence。找不到可信备份就拒绝自动恢复。**两阶段能否兼顾资源与功能尚待真机验证；下载进度本身不证明 Siri AI 已可用。**此流程不会写入或修改 `DeviceSupportsGenerativeModelSystems`。旧版 1.2.0/1.2.1 曾自动写入该字段；1.3.0 不会自动撤销既有修改。预设中的该字段快捷项已移除，直接字段编辑器仍允许用户自行编辑。
 - 原生 Siri AI iPhone：按 Apple 官方型号表与真实 `hw.machine` 精确对应，只改 `CacheExtra` 的国家码、销售区域与监管型号；状态卡不把缓存中缺少 SiriMode 等显式键误报为功能关闭。
-- **1.2.1 旧机型方法重构：感谢 [@snow_femos](https://x.com/snow_femos) 打破长期沿用的 GestaltEdit 式硬件伪装思路。** iOS 27+ 的已映射 iPhone 11 至 iPhone 15/15 Plus（含其间的 Pro 与 SE）按真实 `hw.machine` 严格匹配原销售地区与监管型号，再写入 `LL`、`LL/A`、同机型美版监管型号、`DeviceSupportsGenerativeModelSystems = 1` 和 `SiriMode = 2`；不伪装产品、板号或 CPU。写入后必须完整重启。用户已在 iPhone 13 Pro 上观察到 Apple Intelligence 入口；其他机型和服务可用性仍需分别验证。
+- **历史：1.2.1 旧机型方法重构，感谢 [@snow_femos](https://x.com/snow_femos) 打破长期沿用的 GestaltEdit 式硬件伪装思路。** 当时的流程不伪装产品、板号或 CPU，但自动写入 `DeviceSupportsGenerativeModelSystems = 1` 和 `SiriMode = 2`。用户在 iPhone 13 Pro 上观察到 Apple Intelligence 入口，但资源下载受阻；该旧流程已由 1.3.0 的两阶段试验取代。
 - 写入前把原始 plist 保存到应用 Documents/GestaltBackups，读回验证备份；主文件参照 BQTool 的原位写入方式保留 inode，再读回验证完整数据及关键字段。写入或验证失败时尝试原位恢复原始数据。
 - 1.0.0 增加恢复按钮：每次写入前都会保存独立备份，普通点击恢复最近一次由 YumEdit 保存的 MobileGestalt plist，并在恢复前另存当前缓存。1.1.1 可长按该按钮，从“文件”导入**同一设备**的 plist 再恢复，即使应用已有备份也能选择。备份本身若已被修改，恢复后也仍是修改后的状态；本工具无法凭空生成出厂 plist，也不会故意破坏缓存以触发系统重建。恢复后需重启。
 - 按钮有应用内合成的轻触音效。

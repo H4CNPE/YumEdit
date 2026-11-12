@@ -281,3 +281,18 @@
 "已是目标值。请完整重启设备后检查 Apple Intelligence。" = "Los valores deseados ya están definidos. Reinicia completamente y comprueba Apple Intelligence.";
 "已写入 LL、LL/A、__X0__ 并读回校验。请完整重启设备后检查 Apple Intelligence；缓存写入不代表系统功能已启用。备份在“文件”App 的 GestaltBackups。" = "Se escribieron LL, LL/A y __X0__ y se verificó la caché. Reinicia completamente y comprueba Apple Intelligence. Escribir la caché no demuestra que la función del sistema esté activa. Copia: GestaltBackups en la app Archivos.";
 "已完成，无需再次写入" = "Completado; no hace falta escribir de nuevo";
+
+/* Two-stage older-device workflow (1.3.0) */
+"旧机型两阶段" = "Dos etapas para dispositivos antiguos";
+"第一阶段：临时伪装并下载资源" = "Etapa 1: Suplantar temporalmente el modelo y descargar recursos";
+"第二阶段：恢复真实机型" = "Etapa 2: Restaurar el modelo real";
+"临时伪装机型" = "Modelo suplantado temporalmente";
+"确认资源下载完成后，再执行第二阶段。" = "Complete la descarga de recursos antes de iniciar la etapa 2.";
+"第一阶段会临时修改产品、板号、CPU 与监管型号，可能使 Face ID 和听写暂时失效。写入前自动备份；完整重启后等待系统下载资源。不会写入生成式模型能力字段。" = "La etapa 1 cambia temporalmente el producto, la placa, la CPU y el modelo regulatorio. Face ID y el dictado pueden dejar de funcionar de forma temporal. Se crea una copia de seguridad antes de escribir. Reinicie por completo y espere a que el sistema descargue los recursos. No se escribirá el campo de capacidad del modelo generativo.";
+"第二阶段从同设备、同 CacheData 与 CacheUUID 的历史备份恢复真实产品、板号、CPU 与原监管型号，同时保留美区和 SiriMode。找不到可信备份就拒绝写入；恢复后需完整重启并测试 Face ID、听写及 Siri AI。不会写入生成式模型能力字段。" = "La etapa 2 restaura el producto, la placa, la CPU y el modelo regulatorio originales desde una copia anterior del mismo dispositivo con CacheData y CacheUUID coincidentes; conserva la región de EE. UU. y SiriMode. Si no hay una copia fiable, no se escribe nada. Después, reinicie por completo y pruebe Face ID, el dictado y Siri AI. No se escribirá el campo de capacidad del modelo generativo.";
+"当前仍是临时伪装机型" = "El modelo sigue suplantado temporalmente";
+"当前已是真实机型" = "El modelo real ya está restaurado";
+"第一阶段已写入。请完整重启并等待资源下载完成。" = "Etapa 1 escrita. Reinicie por completo y espere a que termine la descarga.";
+"第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "La etapa 2 restauró la identidad real. Reinicie por completo y pruebe Face ID, el dictado y Siri AI.";
+"旧机型请使用两阶段流程" = "Use el proceso de dos etapas en dispositivos antiguos";
+"我确认资源已下载完成" = "Confirmo que la descarga de recursos ha terminado";

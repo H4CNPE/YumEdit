@@ -281,3 +281,18 @@
 "已是目标值。请完整重启设备后检查 Apple Intelligence。" = "Cílové hodnoty jsou již nastaveny. Zařízení úplně restartujte a zkontrolujte Apple Intelligence.";
 "已写入 LL、LL/A、__X0__ 并读回校验。请完整重启设备后检查 Apple Intelligence；缓存写入不代表系统功能已启用。备份在“文件”App 的 GestaltBackups。" = "LL, LL/A a __X0__ byly zapsány a mezipaměť ověřena. Zařízení úplně restartujte a zkontrolujte Apple Intelligence. Zápis mezipaměti nedokazuje aktivaci systémové funkce. Záloha: GestaltBackups v aplikaci Soubory.";
 "已完成，无需再次写入" = "Hotovo; není třeba znovu zapisovat";
+
+/* Two-stage older-device workflow (1.3.0) */
+"旧机型两阶段" = "Dvě fáze pro starší zařízení";
+"第一阶段：临时伪装并下载资源" = "Fáze 1: Dočasně změnit identitu modelu a stáhnout prostředky";
+"第二阶段：恢复真实机型" = "Fáze 2: Obnovit skutečný model";
+"临时伪装机型" = "Dočasně změněný model";
+"确认资源下载完成后，再执行第二阶段。" = "Před zahájením fáze 2 dokončete stahování prostředků.";
+"第一阶段会临时修改产品、板号、CPU 与监管型号，可能使 Face ID 和听写暂时失效。写入前自动备份；完整重启后等待系统下载资源。不会写入生成式模型能力字段。" = "Fáze 1 dočasně změní produkt, desku, CPU a regulační model. Face ID a diktování mohou dočasně přestat fungovat. Před zápisem se automaticky vytvoří záloha. Úplně restartujte zařízení a počkejte, až systém stáhne prostředky. Pole schopností generativního modelu nebude zapsáno.";
+"第二阶段从同设备、同 CacheData 与 CacheUUID 的历史备份恢复真实产品、板号、CPU 与原监管型号，同时保留美区和 SiriMode。找不到可信备份就拒绝写入；恢复后需完整重启并测试 Face ID、听写及 Siri AI。不会写入生成式模型能力字段。" = "Fáze 2 obnoví skutečný produkt, desku, CPU a původní regulační model ze starší zálohy stejného zařízení se shodnými CacheData a CacheUUID; americká oblast a SiriMode zůstanou zachovány. Bez důvěryhodné zálohy se nic nezapíše. Poté zařízení úplně restartujte a otestujte Face ID, diktování a Siri AI. Pole schopností generativního modelu nebude zapsáno.";
+"当前仍是临时伪装机型" = "Model je stále dočasně změněný";
+"当前已是真实机型" = "Skutečný model je nyní obnoven";
+"第一阶段已写入。请完整重启并等待资源下载完成。" = "Fáze 1 zapsána. Úplně restartujte zařízení a počkejte na dokončení stahování.";
+"第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "Fáze 2 obnovila skutečnou identitu. Úplně restartujte a otestujte Face ID, diktování a Siri AI.";
+"旧机型请使用两阶段流程" = "U starších zařízení použijte dvoufázový postup";
+"我确认资源已下载完成" = "Potvrzuji dokončení stahování prostředků";

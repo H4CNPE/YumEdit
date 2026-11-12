@@ -281,3 +281,18 @@
 "已是目标值。请完整重启设备后检查 Apple Intelligence。" = "The target values are already set. Fully restart the device, then check Apple Intelligence.";
 "已写入 LL、LL/A、__X0__ 并读回校验。请完整重启设备后检查 Apple Intelligence；缓存写入不代表系统功能已启用。备份在“文件”App 的 GestaltBackups。" = "Wrote LL, LL/A, and __X0__, then verified the cache. Fully restart the device and check Apple Intelligence. A successful cache write does not prove the system feature is enabled. Backup: GestaltBackups in the Files app.";
 "已完成，无需再次写入" = "Complete; no need to write again";
+
+/* Two-stage older-device workflow (1.3.0) */
+"旧机型两阶段" = "Two-stage process for older devices";
+"第一阶段：临时伪装并下载资源" = "Stage 1: Temporarily spoof the model and download resources";
+"第二阶段：恢复真实机型" = "Stage 2: Restore the real model";
+"临时伪装机型" = "Temporarily spoofed model";
+"确认资源下载完成后，再执行第二阶段。" = "Complete the resource download before starting Stage 2.";
+"第一阶段会临时修改产品、板号、CPU 与监管型号，可能使 Face ID 和听写暂时失效。写入前自动备份；完整重启后等待系统下载资源。不会写入生成式模型能力字段。" = "Stage 1 temporarily changes the product, board, CPU, and regulatory model. Face ID and dictation may temporarily stop working. A backup is created before writing. Fully restart the device, then wait for system resources to download. The generative model capability field will not be written.";
+"第二阶段从同设备、同 CacheData 与 CacheUUID 的历史备份恢复真实产品、板号、CPU 与原监管型号，同时保留美区和 SiriMode。找不到可信备份就拒绝写入；恢复后需完整重启并测试 Face ID、听写及 Siri AI。不会写入生成式模型能力字段。" = "Stage 2 restores the real product, board, CPU, and original regulatory model from a historical backup of the same device with matching CacheData and CacheUUID, while keeping the US region and SiriMode. If no trustworthy backup is found, nothing is written. Fully restart after restoration and test Face ID, dictation, and Siri AI. The generative model capability field will not be written.";
+"当前仍是临时伪装机型" = "The model is still temporarily spoofed";
+"当前已是真实机型" = "The real model is now restored";
+"第一阶段已写入。请完整重启并等待资源下载完成。" = "Stage 1 written. Fully restart and wait for the resource download to finish.";
+"第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "Stage 2 restored the real identity. Fully restart and test Face ID, dictation, and Siri AI.";
+"旧机型请使用两阶段流程" = "Use the two-stage process for older devices";
+"我确认资源已下载完成" = "I confirm that the resource download is complete";

@@ -281,3 +281,18 @@
 "已是目标值。请完整重启设备后检查 Apple Intelligence。" = "A célértékek már be vannak állítva. Indítsa teljesen újra az eszközt, majd ellenőrizze az Apple Intelligence működését.";
 "已写入 LL、LL/A、__X0__ 并读回校验。请完整重启设备后检查 Apple Intelligence；缓存写入不代表系统功能已启用。备份在“文件”App 的 GestaltBackups。" = "Az LL, LL/A és __X0__ írása és a gyorsítótár ellenőrzése kész. Teljes újraindítás után ellenőrizze az Apple Intelligence működését. A gyorsítótár írása nem bizonyítja a rendszerfunkció aktiválását. Mentés: GestaltBackups a Fájlok alkalmazásban.";
 "已完成，无需再次写入" = "Kész; nem kell újra írni";
+
+/* Two-stage older-device workflow (1.3.0) */
+"旧机型两阶段" = "Két lépés régebbi készülékekhez";
+"第一阶段：临时伪装并下载资源" = "1. lépés: A modell ideiglenes álcázása és az erőforrások letöltése";
+"第二阶段：恢复真实机型" = "2. lépés: A valódi modell visszaállítása";
+"临时伪装机型" = "Ideiglenesen álcázott modell";
+"确认资源下载完成后，再执行第二阶段。" = "A 2. lépés előtt fejezze be az erőforrások letöltését.";
+"第一阶段会临时修改产品、板号、CPU 与监管型号，可能使 Face ID 和听写暂时失效。写入前自动备份；完整重启后等待系统下载资源。不会写入生成式模型能力字段。" = "Az 1. lépés ideiglenesen módosítja a terméket, az alaplapot, a CPU-t és a hatósági modellt. A Face ID és a diktálás átmenetileg leállhat. Írás előtt automatikusan biztonsági mentés készül. Indítsa újra teljesen a készüléket, és várja meg, amíg a rendszer letölti az erőforrásokat. A generatív modell képességmezőjét nem írjuk.";
+"第二阶段从同设备、同 CacheData 与 CacheUUID 的历史备份恢复真实产品、板号、CPU 与原监管型号，同时保留美区和 SiriMode。找不到可信备份就拒绝写入；恢复后需完整重启并测试 Face ID、听写及 Siri AI。不会写入生成式模型能力字段。" = "A 2. lépés visszaállítja a valódi terméket, alaplapot, CPU-t és az eredeti hatósági modellt ugyanazon készülék korábbi, egyező CacheData és CacheUUID értékű mentéséből. Az USA-régió és a SiriMode megmarad. Megbízható mentés nélkül nem történik írás. Ezután indítsa újra teljesen, és tesztelje a Face ID-t, a diktálást és a Siri AI-t. A generatív modell képességmezőjét nem írjuk.";
+"当前仍是临时伪装机型" = "A modell még ideiglenesen álcázott";
+"当前已是真实机型" = "A valódi modell már visszaállt";
+"第一阶段已写入。请完整重启并等待资源下载完成。" = "Az 1. lépés írása kész. Indítsa újra teljesen a készüléket, és várja meg a letöltést.";
+"第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "A 2. lépés visszaállította a valódi azonosítót. Indítsa újra teljesen, és tesztelje a Face ID-t, a diktálást és a Siri AI-t.";
+"旧机型请使用两阶段流程" = "Régebbi készüléken használja a kétlépéses folyamatot";
+"我确认资源已下载完成" = "Megerősítem, hogy az erőforrások letöltése befejeződött";

@@ -281,3 +281,18 @@
 "已是目标值。请完整重启设备后检查 Apple Intelligence。" = "Docelowe wartości są już ustawione. Uruchom urządzenie całkowicie ponownie i sprawdź Apple Intelligence.";
 "已写入 LL、LL/A、__X0__ 并读回校验。请完整重启设备后检查 Apple Intelligence；缓存写入不代表系统功能已启用。备份在“文件”App 的 GestaltBackups。" = "Zapisano LL, LL/A i __X0__ oraz sprawdzono pamięć podręczną. Uruchom całkowicie ponownie i sprawdź Apple Intelligence. Zapis do pamięci podręcznej nie dowodzi aktywacji funkcji systemowej. Kopia: GestaltBackups w aplikacji Pliki.";
 "已完成，无需再次写入" = "Gotowe; ponowny zapis nie jest potrzebny";
+
+/* Two-stage older-device workflow (1.3.0) */
+"旧机型两阶段" = "Dwa etapy dla starszych urządzeń";
+"第一阶段：临时伪装并下载资源" = "Etap 1: Tymczasowo podszyj się pod inny model i pobierz zasoby";
+"第二阶段：恢复真实机型" = "Etap 2: Przywróć prawdziwy model";
+"临时伪装机型" = "Tymczasowo zmieniony model";
+"确认资源下载完成后，再执行第二阶段。" = "Zakończ pobieranie zasobów przed rozpoczęciem etapu 2.";
+"第一阶段会临时修改产品、板号、CPU 与监管型号，可能使 Face ID 和听写暂时失效。写入前自动备份；完整重启后等待系统下载资源。不会写入生成式模型能力字段。" = "Etap 1 tymczasowo zmienia produkt, płytę, CPU i model regulacyjny. Face ID i dyktowanie mogą przejściowo przestać działać. Przed zapisem automatycznie tworzona jest kopia zapasowa. Uruchom urządzenie ponownie i poczekaj, aż system pobierze zasoby. Pole możliwości modelu generatywnego nie zostanie zapisane.";
+"第二阶段从同设备、同 CacheData 与 CacheUUID 的历史备份恢复真实产品、板号、CPU 与原监管型号，同时保留美区和 SiriMode。找不到可信备份就拒绝写入；恢复后需完整重启并测试 Face ID、听写及 Siri AI。不会写入生成式模型能力字段。" = "Etap 2 przywraca prawdziwy produkt, płytę, CPU i pierwotny model regulacyjny z wcześniejszej kopii tego samego urządzenia o zgodnych CacheData i CacheUUID. Region USA i SiriMode zostają zachowane. Bez wiarygodnej kopii nic nie zostanie zapisane. Następnie uruchom urządzenie ponownie i sprawdź Face ID, dyktowanie oraz Siri AI. Pole możliwości modelu generatywnego nie zostanie zapisane.";
+"当前仍是临时伪装机型" = "Model nadal jest tymczasowo zmieniony";
+"当前已是真实机型" = "Prawdziwy model został przywrócony";
+"第一阶段已写入。请完整重启并等待资源下载完成。" = "Etap 1 zapisany. Uruchom urządzenie ponownie i poczekaj na pobranie zasobów.";
+"第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "Etap 2 przywrócił prawdziwą tożsamość. Uruchom ponownie i sprawdź Face ID, dyktowanie oraz Siri AI.";
+"旧机型请使用两阶段流程" = "Dla starszych urządzeń użyj procesu dwuetapowego";
+"我确认资源已下载完成" = "Potwierdzam zakończenie pobierania zasobów";

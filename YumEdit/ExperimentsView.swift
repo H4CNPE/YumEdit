@@ -16,6 +16,7 @@ struct ExperimentsView: View {
                     Text("以下功能未经当前设备验证；写入成功不代表系统会启用功能。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
+                if !RegionWriter.isOlderPhysicalDevice {
                 Section("还原回对应机型并修改美版") {
                     Text("从同设备历史备份恢复真实产品、板号与 CPU，并按已核实型号映射写入美版区域和监管型号。未知型号或找不到匹配备份时拒绝写入。请先备份整机。")
                         .font(.footnote).foregroundStyle(.secondary)
@@ -23,6 +24,7 @@ struct ExperimentsView: View {
                         TapSound.play(.warning); showIdentityRisk = true
                     }
                     .disabled(busy)
+                }
                 }
                 Section("外接屏扩展实验") {
                     Text("分阶段测试 iPad 多任务能力和设备类别。可能损坏音频、通话或相机视频；扩展桌面尚未得到验证。")

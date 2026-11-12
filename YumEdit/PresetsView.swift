@@ -18,7 +18,6 @@ private struct GestaltPreset: Identifiable {
         .init(id: "actionButton", title: "操作按钮", note: "Action Button", keys: ["cT44WE1EohiwRzhsZ8xEsw"], value: true, advanced: false),
         .init(id: "collisionSOS", title: "车祸检测 SOS", note: "Collision SOS", keys: ["HCzWusHQwZDea6nNhaKndw"], value: true, advanced: false),
         .init(id: "parallax", title: "关闭视差效果", note: "Disable Parallax", keys: ["UIParallaxCapability"], value: false, advanced: false),
-        .init(id: "ai", title: "Apple Intelligence", note: "设备能力标记", keys: ["A62OafQ85EJAiiqKn4agtg"], value: true, advanced: true),
         .init(id: "research", title: "安全研究设备", note: "ResearchFuse", keys: ["XYlJKKkj2hztRP1NWWnhlw"], value: true, advanced: true),
         .init(id: "demo", title: "商店展示模式", note: "Store Demo Mode", keys: ["aadL+4GFBDe6DdsUD2HGGw"], value: true, advanced: true)
     ]
@@ -59,15 +58,6 @@ struct PresetsView: View {
                 }
                 Section("设备与 AI · 高风险") {
                     ForEach(GestaltPreset.all.filter { $0.advanced }) { preset in presetRow(preset) }
-                    Button("暂存 Siri AI 美区字段") {
-                        pending["A62OafQ85EJAiiqKn4agtg"] = .boolean(true)
-                        pending["h63QSdBCiT/z0WU6rdQv6Q"] = .string("LL")
-                        pending["yK+xavymRGZ3xWc1tb8XDg"] = .string("LL/A")
-                        status = "已暂存 Siri AI 美区字段；尚未写入"
-                        TapSound.play(.warning)
-                    }
-                    Text("国行设备的监管型号仍需按主页面的机型适配流程处理。")
-                        .font(.caption).foregroundStyle(.secondary)
                 }
                 Section("系统版本伪装 · 高风险") {
                     TextField("版本，例如 27.2", text: $version).textInputAutocapitalization(.never)

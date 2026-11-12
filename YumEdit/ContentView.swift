@@ -26,6 +26,7 @@ struct ContentView: View {
     @State private var showEditor = false
     @State private var showPresets = false
     @State private var showExperiments = false
+    @State private var showOlderFlow = false
     @State private var showAbout = false
     @State private var showRestoreConfirm = false
     @State private var showImportPicker = false
@@ -88,6 +89,11 @@ struct ContentView: View {
                     .padding(12)
                     .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
                     Button {
+                        if deviceSnapshot?.isOlderDevice == true {
+                            TapSound.play(.warning)
+                            showOlderFlow = true
+                            return
+                        }
                         if deviceSnapshot?.isSpoofed == true {
                             TapSound.play(.warning)
                             showRisk = true
@@ -102,7 +108,9 @@ struct ContentView: View {
                         run()
                     } label: {
                         Label {
-                            Text(YumLocalization.text(busy ? "处理中…" : (deviceSnapshot?.isComplete == true ? "已完成，无需再次写入" : (deviceSnapshot?.isSpoofed == true ? "恢复真实机型并启动 Apple Intelligence" : "更改销售地区并启动 Apple Intelligence"))))
+                            Text(deviceSnapshot?.isOlderDevice == true && !busy
+                                ? YumLocalization.text("旧机型两阶段") + " · " + YumLocalization.text("实验性选项")
+                                : YumLocalization.text(busy ? "处理中…" : (deviceSnapshot?.isComplete == true ? "已完成，无需再次写入" : (deviceSnapshot?.isSpoofed == true ? "恢复真实机型并启动 Apple Intelligence" : "更改销售地区并启动 Apple Intelligence"))))
                         } icon: {
                             Image(systemName: "sparkles")
                         }
@@ -272,6 +280,7 @@ struct ContentView: View {
         .sheet(isPresented: $showEditor) { GestaltEditorView() }
         .sheet(isPresented: $showPresets) { PresetsView() }
         .sheet(isPresented: $showExperiments) { ExperimentsView() }
+        .sheet(isPresented: $showOlderFlow) { OlderDeviceFlowView(source: salesSource) }
         .sheet(isPresented: $showAbout) { AboutView().presentationDetents([.medium]) }
         .alert("恢复 MobileGestalt 备份", isPresented: $showRestoreConfirm) {
             Button("恢复所示备份", role: .destructive) {
@@ -308,6 +317,7 @@ struct ContentView: View {
         }
         .onChange(of: quickAction.respringRequested) { _, _ in presentRespringShortcutIfNeeded() }
         .onChange(of: showExperiments) { _, visible in if !visible { refreshSnapshot() } }
+        .onChange(of: showOlderFlow) { _, visible in if !visible { refreshSnapshot() } }
         .onChange(of: showEditor) { _, visible in if !visible { refreshSnapshot() } }
         .onChange(of: showPresets) { _, visible in if !visible { refreshSnapshot() } }
         .preferredColorScheme(.dark)
@@ -387,6 +397,7 @@ nonisolated enum RegionWriter {
         let isSpoofed: Bool
         let showsExperimentalAIFields: Bool
         let isComplete: Bool
+        let isOlderDevice: Bool
     }
     struct SpoofProfile: Identifiable, Sendable {
         let name: String
@@ -415,6 +426,7 @@ nonisolated enum RegionWriter {
         .init(name: "iPad Pro 11 英寸 M4 蜂窝", product: "iPad16,4", board: "J718AP", cpu: "t8132", regulatory: "A2837")
     ]
     static var isPad: Bool { deviceIdentifier().hasPrefix("iPad") }
+    static var isOlderPhysicalDevice: Bool { olderUSModels[deviceIdentifier()] != nil }
     static var hasSmallNotch: Bool {
         ["iPhone14,2", "iPhone14,3", "iPhone14,4", "iPhone14,5", "iPhone14,7", "iPhone14,8"].contains(deviceIdentifier())
     }
@@ -525,11 +537,10 @@ nonisolated enum RegionWriter {
                 (expectedBoard != nil && extra[boardKey] as? String != expectedBoard) ||
                 (expectedCPU != nil && extra[cpuKey] as? String != expectedCPU))
             let nativeAI = products[physical] != nil || padModels[physical] != nil
-            let targetModelMatches = (products[physical] ?? olderUSModels[physical]).map { $0 == regulatoryValue }
+            let targetModelMatches = products[physical].map { $0 == regulatoryValue }
                 ?? (padModels[physical]?.values.contains(regulatoryValue) == true)
-            let isComplete = !changedIdentity && cached == physical &&
-                countryValue == "LL" && regionValue == "LL/A" && targetModelMatches &&
-                (nativeAI || (siriModeValue == 2 && generativeValue == 1))
+            let isComplete = nativeAI && !changedIdentity && cached == physical &&
+                countryValue == "LL" && regionValue == "LL/A" && targetModelMatches
             let snapshot = DeviceSnapshot(
                 physicalModel: physical,
                 cachedModel: cached,
@@ -540,7 +551,8 @@ nonisolated enum RegionWriter {
                 generativeCapability: generativeValue,
                 isSpoofed: changedIdentity,
                 showsExperimentalAIFields: !nativeAI,
-                isComplete: isComplete)
+                isComplete: isComplete,
+                isOlderDevice: olderUSModels[physical] != nil)
             return (snapshot, nil)
         } catch {
             return (nil, error.localizedDescription)
@@ -1090,9 +1102,70 @@ nonisolated enum RegionWriter {
         applyConfigured(source: source, requireSpoof: false)
     }
     static func restoreAndApplyUS() -> (Bool, String) {
-        applyConfigured(source: nil, requireSpoof: true)
+        if olderUSModels[deviceIdentifier()] != nil { return (false, "旧机型请使用两阶段流程") }
+        return applyConfigured(source: nil, requireSpoof: true)
+    }
+    static func beginOlderDownloadStage(profileProduct: String, source: SalesSource) -> (Bool, String) {
+        let machine = deviceIdentifier()
+        guard olderUSModels[machine] != nil else { return (false, "当前机型不属于旧机型两阶段支持范围") }
+        guard ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 27 else {
+            return (false, "旧机型两阶段仅适用于 iOS 27 及以上")
+        }
+        guard let profile = spoofProfiles.first(where: { $0.product == profileProduct }) else {
+            return (false, "未知临时伪装机型，未写入")
+        }
+        let result = mutateRoot { root in
+            guard var extra = root["CacheExtra"] as? [String: Any],
+                  extra[productKey] as? String == machine,
+                  extra[boardKey] as? String == physicalBoards[machine],
+                  extra[cpuKey] as? String == physicalCPU(for: machine) else {
+                throw SalesError.unknownSpoof
+            }
+            _ = try validatedUSModel(machine: machine, source: source, extra: extra)
+            extra[country] = "LL"
+            extra[region] = "LL/A"
+            extra[regulatory] = profile.regulatory
+            extra[productKey] = profile.product
+            extra[boardKey] = profile.board
+            extra[cpuKey] = profile.cpu
+            extra[siriModeKey] = 2
+            var changed = root
+            changed["CacheExtra"] = extra
+            return changed
+        }
+        return result.0
+            ? (true, "第一阶段已写入并校验。请完整重启，等待资源下载完成；确认后再执行第二阶段。")
+            : result
+    }
+
+    static func finishOlderDownloadStage() -> (Bool, String) {
+        let machine = deviceIdentifier()
+        guard olderUSModels[machine] != nil else { return (false, "当前机型不属于旧机型两阶段支持范围") }
+        let result = mutateRoot { root in
+            guard var extra = root["CacheExtra"] as? [String: Any],
+                  let cachedProduct = extra[productKey] as? String,
+                  cachedProduct != machine,
+                  extra[country] as? String == "LL",
+                  extra[region] as? String == "LL/A" else {
+                throw SalesError.alreadyReal
+            }
+            let (originalIdentity, _, _) = try historicalIdentity(
+                current: root, machine: machine, selectedSource: nil)
+            for key in [productKey, boardKey, cpuKey, regulatory] {
+                guard let value = originalIdentity[key] as? String else { throw SalesError.noOriginalBackup }
+                extra[key] = value
+            }
+            // Keep sales region, SiriMode and generative capability exactly as currently cached.
+            var changed = root
+            changed["CacheExtra"] = extra
+            return changed
+        }
+        return result.0
+            ? (true, "第二阶段已恢复真实机型并校验。请完整重启，再测试 Face ID、听写和 Apple Intelligence。")
+            : result
     }
     private static func applyConfigured(source: SalesSource?, requireSpoof: Bool) -> (Bool, String) {
+        if olderUSModels[deviceIdentifier()] != nil { return (false, "旧机型请使用两阶段流程") }
         let signedGroups = YumEditSigningGroups() ?? []
         guard !signedGroups.isEmpty else {
             return (false, "当前签名没有 App Group。P12 证书本身不授予此权限；请使用包含 App Group 的 provisioning profile 重新签名。")
@@ -1113,10 +1186,6 @@ nonisolated enum RegionWriter {
                 return (false, "plist 结构不符合预期，未写入")
             }
             let machine = deviceIdentifier()
-            let oldDevice = olderUSModels[machine] != nil
-            if oldDevice && ProcessInfo.processInfo.operatingSystemVersion.majorVersion < 27 {
-                return (false, "SiriMode 实验字段仅在 iOS 27 及以上启用")
-            }
             let cachedProduct = extra[productKey] as? String
             guard let expectedBoard = physicalBoards[machine],
                   let expectedCPU = physicalCPU(for: machine) else { throw SalesError.unknownModel }
@@ -1139,8 +1208,7 @@ nonisolated enum RegionWriter {
             }
             let alreadyUS = extra[country] as? String == "LL" && extra[region] as? String == "LL/A"
             let alreadyModel = extra[regulatory] as? String == model
-            let alreadyAI = !oldDevice || (extra[siriModeKey] as? Int == 2 && extra[generativeKey] as? Int == 1)
-            if !isSpoofed && alreadyUS && alreadyModel && alreadyAI {
+            if !isSpoofed && alreadyUS && alreadyModel {
                 return (true, YumLocalization.text("已是目标值。请完整重启设备后检查 Apple Intelligence。"))
             }
             let backups = backupDirectory
@@ -1151,10 +1219,6 @@ nonisolated enum RegionWriter {
             extra[country] = "LL"
             extra[region] = "LL/A"
             extra[regulatory] = model
-            if oldDevice {
-                extra[generativeKey] = 1
-                extra[siriModeKey] = 2
-            }
             var modified = root
             modified["CacheExtra"] = extra
             let data = try PropertyListSerialization.data(fromPropertyList: modified, format: .binary, options: 0)
@@ -1166,10 +1230,6 @@ nonisolated enum RegionWriter {
                 let verify = verifyRoot?["CacheExtra"] as? [String: Any]
                 guard verify?[country] as? String == "LL", verify?[region] as? String == "LL/A",
                       verify?[regulatory] as? String == model else { throw WriteError.verify }
-                if oldDevice {
-                    guard verify?[siriModeKey] as? Int == 2,
-                          verify?[generativeKey] as? Int == 1 else { throw WriteError.verify }
-                }
                 guard verify?[productKey] as? String == machine else { throw WriteError.verify }
                 guard verify?[boardKey] as? String == expectedBoard,
                       verify?[cpuKey] as? String == expectedCPU else { throw WriteError.verify }
