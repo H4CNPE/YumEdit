@@ -15,14 +15,15 @@ struct ContentView: View {
     @State private var europeanDevice = false
     @State private var spoofProduct = RegionWriter.isPad ? "iPad16,3" : "iPhone16,1"
     @State private var showRisk = false
+    @State private var showExperimentsRisk = false
     @State private var showEuropeanRisk = false
     @State private var showIslandRisk = false
     @State private var showEditorRisk = false
-    @State private var showPresetsRisk = false
     @State private var showRespringRisk = false
     @State private var respringActive = false
     @State private var showEditor = false
     @State private var showPresets = false
+    @State private var showExperiments = false
     @State private var showAbout = false
     @State private var showRestoreConfirm = false
     @State private var showImportPicker = false
@@ -55,7 +56,7 @@ struct ContentView: View {
                     Toggle(isOn: $experimental) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("旧机型实验模式").font(.headline)
-                            Text("旧款 iPhone / iPad；伪装设备身份，可能导致 Face ID 或系统功能失效")
+                            Text("旧机型 Siri AI 尚未独立复现；伪装身份可能影响 Face ID")
                                 .font(.caption).foregroundStyle(.white.opacity(0.58))
                         }
                     }
@@ -180,8 +181,8 @@ struct ContentView: View {
                                 .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
                         }
                         Button {
-                            TapSound.play(.warning)
-                            showPresetsRisk = true
+                            TapSound.play()
+                            showPresets = true
                         } label: {
                             Label("预设修改", systemImage: "switch.2")
                                 .frame(maxWidth: .infinity).padding(.vertical, 12)
@@ -189,6 +190,16 @@ struct ContentView: View {
                         }
                     }
                     .font(.footnote.weight(.medium)).buttonStyle(.plain).disabled(busy)
+                    Button {
+                        TapSound.play(.warning)
+                        showExperimentsRisk = true
+                    } label: {
+                        Label("实验性选项", systemImage: "flask")
+                            .font(.footnote.weight(.semibold))
+                            .frame(maxWidth: .infinity).padding(.vertical, 12)
+                            .background(Color.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+                    }
+                    .buttonStyle(.plain).disabled(busy)
                     Text("仅写入已知机型。请先完成整机备份。")
                         .font(.footnote).foregroundStyle(.white.opacity(0.5))
                     Button {
@@ -231,6 +242,12 @@ struct ContentView: View {
                 }
             }
         }
+        .fullScreenCover(isPresented: $showExperimentsRisk) {
+            RiskScreen(title: "高风险：实验性选项", detail: "外接屏与硬件身份恢复均未经当前设备验证，可能影响音频、Face ID 或系统稳定性。请先备份整机。各项写入仍会再次确认。", action: "我了解风险，进入实验性选项") {
+                showExperimentsRisk = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showExperiments = true }
+            } cancel: { showExperimentsRisk = false }
+        }
         .fullScreenCover(isPresented: $showIslandRisk) {
             RiskScreen(title: "高风险：灵动岛布局", detail: "参考 BQTool 修改 Dynamic Island 与 ArtworkDeviceSubType。iPhone 18 Pro 专用值尚未核实，本选项使用已知 16 Pro 布局值 2622 试验；可能错位、遮挡状态栏或影响 Face ID。写入前会备份；重启或 respring 后观察。", action: "我了解风险，继续写入") {
                 showIslandRisk = false
@@ -249,12 +266,6 @@ struct ContentView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showEditor = true }
             } cancel: { showEditorRisk = false }
         }
-        .fullScreenCover(isPresented: $showPresetsRisk) {
-            RiskScreen(title: "高风险：预设修改", detail: "预设会直接改写 MobileGestalt 字段。某些开关可能影响显示、充电、设备身份或系统稳定性；未经当前设备验证。请先备份整机；应用时会再次确认。", action: "我了解风险，进入预设") {
-                showPresetsRisk = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showPresets = true }
-            } cancel: { showPresetsRisk = false }
-        }
         .fullScreenCover(isPresented: $showRespringRisk) {
             RiskScreen(title: "高风险：Respring", detail: "参考 BQTool 的 NeoSpring 方式触发 SpringBoard 重启。所有打开的 App 会关闭，未保存内容可能丢失；此方式在不同 iPadOS / iOS 版本上不保证成功。", action: "我了解风险，Respring") {
                 showRespringRisk = false
@@ -264,6 +275,7 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $respringActive) { NeoSpringView() }
         .sheet(isPresented: $showEditor) { GestaltEditorView() }
         .sheet(isPresented: $showPresets) { PresetsView() }
+        .sheet(isPresented: $showExperiments) { ExperimentsView() }
         .sheet(isPresented: $showAbout) { AboutView().presentationDetents([.medium]) }
         .alert("恢复 MobileGestalt 备份", isPresented: $showRestoreConfirm) {
             Button("恢复所示备份", role: .destructive) {
@@ -949,6 +961,125 @@ nonisolated enum RegionWriter {
             return (true, "已写入 LL、LL/A、\(model)\(profileText) 并读回校验。请重启设备再检查 Siri AI；本结果只证明缓存文件已修改，不代表系统功能已启用。备份在“文件”App 的 GestaltBackups。")
         } catch {
             return (false, "操作失败：\(error.localizedDescription)。请检查 GestaltBackups。")
+        }
+    }
+
+    static func restoreRealHardwareIdentity() -> (Bool, String) {
+        let machine = deviceIdentifier()
+        guard machine.hasPrefix("iPhone") || machine.hasPrefix("iPad") else {
+            return (false, "仅支持 iPhone 与 iPad 的硬件身份恢复")
+        }
+        let productKey = "h9jDsbgj7xIVeIQ8S3/X3Q"
+        let boardKey = "oYicEKzVTz4/CxxE05pEgQ"
+        let cpuKey = "5pYKlGnYYBzGvAlIU8RjEQ"
+        let outcome = mutateRoot { root in
+            guard var extra = root["CacheExtra"] as? [String: Any],
+                  let currentData = root["CacheData"] as? Data,
+                  let currentProduct = extra[productKey] as? String,
+                  let currentBoard = extra[boardKey] as? String,
+                  let currentCPU = extra[cpuKey] as? String,
+                  let currentModel = extra[regulatory] as? String else { throw IdentityRestoreError.invalidCache }
+            guard currentProduct != machine else { throw IdentityRestoreError.alreadyOriginal }
+            let profiles = machine.hasPrefix("iPad") ? padSpoofProfiles : spoofProfiles
+            guard profiles.contains(where: {
+                $0.product == currentProduct && $0.board == currentBoard &&
+                $0.cpu == currentCPU && $0.regulatory == currentModel
+            }) else { throw IdentityRestoreError.unknownSpoof }
+            guard FileManager.default.fileExists(atPath: backupDirectory.path) else { throw IdentityRestoreError.noBackup }
+            let files = try FileManager.default.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)
+                .filter { $0.lastPathComponent.hasPrefix("MobileGestalt-") && $0.pathExtension == "plist" }
+                .sorted {
+                    let a = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+                    let b = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+                    return a > b
+                }
+            for file in files {
+                guard let bytes = try? Data(contentsOf: file),
+                      let backup = try? PropertyListSerialization.propertyList(from: bytes, format: nil) as? [String: Any],
+                      let originalData = backup["CacheData"] as? Data,
+                      originalData == currentData,
+                      let original = backup["CacheExtra"] as? [String: Any],
+                      original[productKey] as? String == machine,
+                      let board = original[boardKey] as? String, !board.isEmpty,
+                      let cpu = original[cpuKey] as? String, !cpu.isEmpty,
+                      let model = original[regulatory] as? String, !model.isEmpty else { continue }
+                extra[productKey] = machine
+                extra[boardKey] = board
+                extra[cpuKey] = cpu
+                extra[regulatory] = model
+                var result = root
+                result["CacheExtra"] = extra
+                return result
+            }
+            throw IdentityRestoreError.noBackup
+        }
+        return outcome.0
+            ? (true, "已从历史备份恢复真实硬件身份，保留当前区域、AI 能力与 SiriMode，并读回校验。请重启后检查 Face ID 与 Siri AI；两者是否可同时使用仍未经验证。")
+            : outcome
+    }
+
+    private static let siriModeKey = "a3n5T9sFtlyQ74NEp9ESxg"
+    private static var siriModeBaselineURL: URL {
+        backupDirectory.appendingPathComponent("SiriModeBaseline-\(deviceIdentifier()).plist")
+    }
+    static func applySiriModeOnly() -> (Bool, String) {
+        let machine = deviceIdentifier()
+        let family = Int(machine.dropFirst(6).prefix(while: { $0.isNumber })) ?? 0
+        guard machine.hasPrefix("iPhone"), (12...17).contains(family), products[machine] == nil,
+              ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 27 else {
+            return (false, "仅支持 iOS 27 及以上的非原生 Siri AI iPhone")
+        }
+        let outcome = mutateRoot { root in
+            guard var extra = root["CacheExtra"] as? [String: Any] else { throw WriteError.verify }
+            try FileManager.default.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+            let baseline = siriModeBaselineURL
+            if !FileManager.default.fileExists(atPath: baseline.path) {
+                let bytes = try PropertyListSerialization.data(fromPropertyList: root, format: .binary, options: 0)
+                try bytes.write(to: baseline, options: .atomic)
+                guard try Data(contentsOf: baseline) == bytes else { throw WriteError.verify }
+            }
+            extra[siriModeKey] = 2
+            var result = root
+            result["CacheExtra"] = extra
+            return result
+        }
+        return outcome.0
+            ? (true, "已在 CacheExtra 新增或设置 SiriMode=2，并读回校验；未伪装机型。重启后检查 Siri AI、听写和 Face ID。文件可读不代表系统采用此值。")
+            : outcome
+    }
+    static func restoreSiriModeOnly() -> (Bool, String) {
+        let baselineURL = siriModeBaselineURL
+        guard let data = try? Data(contentsOf: baselineURL),
+              let baseline = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+              let original = baseline["CacheExtra"] as? [String: Any],
+              let originalData = baseline["CacheData"] as? Data else {
+            return (false, "找不到本机 SiriMode 实验基线，未写入")
+        }
+        let outcome = mutateRoot { root in
+            guard var extra = root["CacheExtra"] as? [String: Any],
+                  let currentData = root["CacheData"] as? Data,
+                  currentData == originalData,
+                  extra[siriModeKey] as? Int == 2 else { throw WriteError.verify }
+            extra[siriModeKey] = original[siriModeKey]
+            var result = root
+            result["CacheExtra"] = extra
+            return result
+        }
+        if outcome.0 { try? FileManager.default.removeItem(at: baselineURL) }
+        return outcome.0
+            ? (true, "已恢复 SiriMode 实验前的原值，其他字段未改动。请重启设备。")
+            : outcome
+    }
+
+    private enum IdentityRestoreError: LocalizedError {
+        case invalidCache, alreadyOriginal, unknownSpoof, noBackup
+        var errorDescription: String? {
+            switch self {
+            case .invalidCache: "当前硬件身份字段不完整，未写入"
+            case .alreadyOriginal: "产品型号已是真实机型，无需恢复"
+            case .unknownSpoof: "当前身份与 YumEdit 已知伪装配置不一致，未写入"
+            case .noBackup: "找不到同设备且 CacheData 一致的伪装前备份，未写入"
+            }
         }
     }
 

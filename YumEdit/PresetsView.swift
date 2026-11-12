@@ -38,8 +38,6 @@ struct PresetsView: View {
     @State private var showIslandRisk = false
     @State private var showIPadOSRisk = false
     @State private var showDisableIPadOSRisk = false
-    @State private var showExternalDisplayRisk = false
-    @State private var showExternalDisplay = false
     @State private var showRespringRisk = false
     @State private var respringActive = false
     private let islandOptions = [
@@ -109,12 +107,6 @@ struct PresetsView: View {
                         Text("此项目会修改二进制 CacheData，标记校验失败时拒绝写入。请保留完整备份。")
                             .font(.caption).foregroundStyle(.secondary)
                     }
-                    Section("外接屏扩展 · 实验") {
-                        Button("进入外接屏实验") { TapSound.play(.warning); showExternalDisplayRisk = true }
-                            .disabled(busy)
-                        Text("分阶段测试台前调度、iPad 能力和设备类别；尚未在 iOS 27 真机证明扩展桌面可用。")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
                 }
                 Section {
                     Button(YumLocalization.text("应用暂存修改（\(pending.count) 个字段）")) { TapSound.play(.warning); showApplyRisk = true }
@@ -151,12 +143,6 @@ struct PresetsView: View {
                 disableIPadOS()
             } cancel: { showDisableIPadOSRisk = false }
         }
-        .fullScreenCover(isPresented: $showExternalDisplayRisk) {
-            RiskScreen(title: "高风险：外接屏实验", detail: "本实验可能更改 iPadOS 设备类别，已有机型出现音频、麦克风、电话及相机视频失效。请先完成整机备份，并准备好用原始 plist 恢复。此功能尚未证明能在 iOS 27 启用扩展桌面。", action: "我了解风险，进入实验") {
-                showExternalDisplayRisk = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showExternalDisplay = true }
-            } cancel: { showExternalDisplayRisk = false }
-        }
         .fullScreenCover(isPresented: $showRespringRisk) {
             RiskScreen(title: "高风险：Respring", detail: "参考 BQTool 的 NeoSpring 方式触发 SpringBoard 重启。所有打开的 App 会关闭，未保存内容可能丢失；此方式在不同 iPadOS / iOS 版本上不保证成功。", action: "我了解风险，Respring") {
                 showRespringRisk = false
@@ -164,7 +150,6 @@ struct PresetsView: View {
             } cancel: { showRespringRisk = false }
         }
         .fullScreenCover(isPresented: $respringActive) { NeoSpringView() }
-        .sheet(isPresented: $showExternalDisplay) { ExternalDisplayView() }
     }
 
     private func presetRow(_ preset: GestaltPreset) -> some View {
