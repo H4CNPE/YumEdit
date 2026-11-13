@@ -296,3 +296,49 @@
 "第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "Fáze 2 obnovila skutečnou identitu. Úplně restartujte a otestujte Face ID, diktování a Siri AI.";
 "旧机型请使用两阶段流程" = "U starších zařízení použijte dvoufázový postup";
 "我确认资源已下载完成" = "Potvrzuji dokončení stahování prostředků";
+
+/* Strata-inspired experimental workflow and photo repair */
+"检测到扩图字段异常，点击修正" = "Byla zjištěna abnormalita v poli rozšíření obrazu. Kliknutím opravíte.";
+"只修正已存在的两个扩图能力字段；写入前保存完整备份并读回校验。" = "Opravena jsou pouze dvě existující pole možností rozšíření obrazu; před zápisem uložte kompletní zálohu a pro ověření si ji znovu přečtěte.";
+"修正扩图字段" = "Správné pole rozšíření obrazu";
+"写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。" = "Zápis do oblasti USA, režim SiriMode, možnosti generativního modelu a tři sloty CacheData. Kamufláž modelu je volitelná; při zapnutí se změní pouze ProductType, což může ovlivnit Face ID a diktování. Automatické zálohování před zápisem; testovací zdroj stažení po úplném restartu.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID、听写与 Siri AI。" = "Používá se pouze při výběru kamufláže modelu v první fázi. Obnovte skutečný ProductType z historické zálohy stejného zařízení se zachováním oblasti USA a polí schopností. Zakázat zápis, pokud není nalezena žádná důvěryhodná záloha; po obnovení dokončete restart a otestujte Face ID, diktování a Siri AI.";
+"高风险：修正扩图字段" = "Vysoké riziko: opravte pole rozšíření obrazu";
+"仅当两个字段均存在且值异常时，写入 M1n2sAqf33NAOgZRGxQYBA=true 与 rb2tKZxIjOGm2tBmUQSLqQ=false。操作前自动备份，完成后需重启测试。" = "Zapište M1n2sAqf33NAOgZRGxQYBA=true a rb2tKZxIjOGm2tBmUQSLqQ=false pouze v případě, že jsou přítomna obě pole a mají abnormální hodnoty. Automaticky zálohovat před operací a restartovat test po dokončení.";
+"仅旧机型可使用此修正" = "Tato oprava je k dispozici pouze u starších modelů";
+"扩图字段已备份、修正并读回校验。请完整重启后测试照片功能。" = "Rozšířená pole obrázků byla zálohována, opravena a zpětně načtena pro ověření. Po úplném restartu otestujte funkci fotografie.";
+"能力字段已写入并校验。请完整重启，检查资源下载与功能。" = "Pole způsobilosti byla zapsána a ověřena. Restartujte prosím úplně a zkontrolujte stahování zdrojů a funkce.";
+
+/* Siri settings warning after restoring real model */
+"高风险：临时伪装机型" = "Vysoké riziko: Dočasný kamuflážní model";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面" = "Po obnovení skutečného modelu neotevírejte stránku „Nastavení → Siri“.";
+"打开该页面可能重新检查设备资格，使已下载的 Siri AI 资源失效。请只通过语音测试，勿进入 Siri 设置。" = "Otevření této stránky může znovu zkontrolovat způsobilost zařízení a zneplatnit stažené zdroje Siri AI. Projděte pouze hlasovým testem a nezadávejte nastavení Siri.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。" = "Používá se pouze při výběru kamufláže modelu v první fázi. Obnovte skutečný ProductType z historické zálohy stejného zařízení se zachováním oblasti USA a polí schopností. Deny zapíše, pokud není nalezena žádná důvěryhodná záloha; obnovit a plně restartovat a otestovat Face ID a diktování. Nikdy nechoďte do „Nastavení → Siri“.";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面。它可能重新检查设备资格，使下载的资源失效。恢复后完整重启，只通过语音测试 Siri。" = "Po obnovení skutečného modelu neotevírejte stránku „Nastavení → Siri“. Může znovu zkontrolovat způsobilost zařízení a znehodnotit stažené zdroje. Po obnovení proveďte úplný restart a otestujte Siri pouze svým hlasem.";
+"千万不要打开「设置 → Siri」" = "Nikdy neotevírejte „Nastavení → Siri“";
+"已恢复真实机型。请完整重启设备。进入 Siri 设置可能触发设备资格重新检查；只通过语音测试 Siri，并检查 Face ID 和听写。" = "Skutečný model byl obnoven. Prosím úplně restartujte zařízení. Přechod do nastavení Siri může vyvolat překontrolování způsobilosti zařízení; otestujte Siri pouze hlasem a zkontrolujte Face ID a diktování.";
+"我记住了" = "vzpomínám";
+
+/* Experimental full spoofing and general sales regions */
+"完整机型伪装" = "Kompletní kamufláž modelu";
+"选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。" = "Vyberte cílový model a oblast prodeje a automaticky vyplňte ověřené číslo desky, CPU a regulační model. Neznámá kombinace odmítá zápis.";
+"进入完整机型伪装" = "Zadejte kompletní model maskování";
+"极高风险：完整机型伪装" = "Extrémně vysoké riziko: Kompletní převlek modelu";
+"此功能同时修改产品、板号、CPU、监管型号和销售地区，可能导致 Face ID、听写、通信或启动异常。请先备份整机。" = "Tato funkce současně upravuje produkt, číslo desky, CPU, regulační model a oblast prodeje, což může způsobit abnormality Face ID, diktování, komunikace nebo spouštění. Nejprve prosím zálohujte celý stroj.";
+"我了解风险，进入机型伪装" = "Chápu rizika a vstupuji do maskování modelu";
+"仅对已核实的机型、板号、CPU 与监管型号组合写入。" = "Napište pouze ověřenou kombinaci modelu, čísla desky, CPU a regulačního modelu.";
+"此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。" = "Tato funkce zcela zakryje identitu modelu a může ovlivnit Face ID, diktování, komunikaci a stabilitu systému. Kompletní plist je před zápisem zálohován.";
+"目标机型" = "Cílový model";
+"机型" = "Model";
+"销售地区代码，例如 LL / CH / JP" = "Kód oblasti prodeje, například LL/CH/JP";
+"无可靠映射，不可写入" = "Žádné spolehlivé mapování, nelze zapisovat";
+"写入实验性机型伪装" = "Napište experimentální model kamufláže";
+"完整机型伪装 · 实验性" = "Kompletní kamufláž modelu · Experimentální";
+"将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。" = "Současně budou přepsány ProductType, číslo desky, CPU, regulační model a oblast prodeje. Může způsobit Face ID, diktování, komunikaci nebo abnormality spouštění. Psaní je povoleno pouze v případě, že je znám model; před pokračováním uložte kompletní zálohu.";
+"高风险：销售地区修改" = "Vysoké riziko: Úprava prodejního území";
+"将把当前销售地区改为 LL/A。已知机型可匹配美版监管型号；未知地区的监管型号会保留原值。修改设备身份可能影响系统功能；请先备份。" = "Změní aktuální oblast prodeje na LL/A. Známé modely se mohou shodovat s americkým regulačním modelem; regulační modely v neznámých oblastech si zachovají původní hodnotu. Úprava identity zařízení může ovlivnit systémové funkce; prosím nejprve zálohujte.";
+"销售地区代码必须是 1–3 个英文字母" = "Kód prodejní oblasti musí obsahovat 1–3 anglická písmena";
+"目标机型与销售地区缺少可靠监管型号映射，未写入" = "Cílový model a prodejní region postrádají spolehlivé mapování regulačního modelu a nebyly napsány.";
+"当前真实机型未列入已核实硬件表，未写入" = "Aktuální reálný model není uveden v ověřené hardwarové tabulce a nebyl zapsán.";
+"实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。" = "Experimentální model, číslo desky, CPU, regulační model a oblast prodeje byly napsány a ověřeny; restartujte prosím úplně.";
+"第二阶段已恢复真实机型并校验。请完整重启，测试 Face ID 与听写；千万不要打开「设置 → Siri」。" = "Ve druhé fázi byl skutečný model restaurován a ověřen. Restartujte úplně, abyste otestovali Face ID a diktování; neotevírejte \"Nastavení → Siri\".";

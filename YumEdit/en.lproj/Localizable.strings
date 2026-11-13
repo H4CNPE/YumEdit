@@ -296,3 +296,49 @@
 "第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "Stage 2 restored the real identity. Fully restart and test Face ID, dictation, and Siri AI.";
 "旧机型请使用两阶段流程" = "Use the two-stage process for older devices";
 "我确认资源已下载完成" = "I confirm that the resource download is complete";
+
+/* Strata-inspired experimental workflow and photo repair */
+"检测到扩图字段异常，点击修正" = "Photo expansion fields need repair — tap to fix";
+"只修正已存在的两个扩图能力字段；写入前保存完整备份并读回校验。" = "Only the two existing photo expansion capability fields will be corrected. A full backup is saved and the write is verified.";
+"修正扩图字段" = "Repair photo expansion fields";
+"写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。" = "Write the US region, SiriMode, generative model capability, and three CacheData slots. Model spoofing is optional; when enabled, only ProductType changes, which may affect Face ID and dictation. A backup is created before writing. Fully restart and test the resource download.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID、听写与 Siri AI。" = "Use this only if model spoofing was selected in Stage 1. Restore the real ProductType from a historical backup of the same device while preserving the US region and capability fields. No trusted backup means no write. Fully restart and test Face ID, dictation, and Siri AI.";
+"高风险：修正扩图字段" = "High risk: Repair photo expansion fields";
+"仅当两个字段均存在且值异常时，写入 M1n2sAqf33NAOgZRGxQYBA=true 与 rb2tKZxIjOGm2tBmUQSLqQ=false。操作前自动备份，完成后需重启测试。" = "Only when both fields exist and have incorrect values, write M1n2sAqf33NAOgZRGxQYBA=true and rb2tKZxIjOGm2tBmUQSLqQ=false. A backup is created first. Restart and test afterward.";
+"仅旧机型可使用此修正" = "This repair is available only for older devices";
+"扩图字段已备份、修正并读回校验。请完整重启后测试照片功能。" = "Photo expansion fields were backed up, corrected, and verified. Fully restart and test Photos.";
+"能力字段已写入并校验。请完整重启，检查资源下载与功能。" = "Capability fields were written and verified. Fully restart, then check resource downloads and functionality.";
+
+/* Siri settings warning after restoring real model */
+"高风险：临时伪装机型" = "High risk: Temporarily spoof device model";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面" = "After restoring the real model, do not open Settings → Siri";
+"打开该页面可能重新检查设备资格，使已下载的 Siri AI 资源失效。请只通过语音测试，勿进入 Siri 设置。" = "Opening that page may recheck device eligibility and invalidate downloaded Siri AI resources. Test only by voice; do not enter Siri settings.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。" = "Use this only if model spoofing was selected in Stage 1. Restore the real ProductType from a historical backup of the same device while preserving the US region and capability fields. No trusted backup means no write. Fully restart, then test Face ID and dictation. Do not enter Settings → Siri.";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面。它可能重新检查设备资格，使下载的资源失效。恢复后完整重启，只通过语音测试 Siri。" = "After restoring the real model, do not open Settings → Siri. It may recheck device eligibility and invalidate downloaded resources. Fully restart after restoration, and test Siri only by voice.";
+"千万不要打开「设置 → Siri」" = "Do not open Settings → Siri";
+"已恢复真实机型。请完整重启设备。进入 Siri 设置可能触发设备资格重新检查；只通过语音测试 Siri，并检查 Face ID 和听写。" = "The real model has been restored. Fully restart the device. Entering Siri settings may trigger another device eligibility check. Test Siri only by voice, and check Face ID and dictation.";
+"我记住了" = "I understand";
+
+/* Experimental full spoofing and general sales regions */
+"完整机型伪装" = "Full device-model spoofing";
+"选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。" = "Select a target model and sales region. Verified board, CPU, and regulatory model values are filled in automatically. Unknown combinations cannot be written.";
+"进入完整机型伪装" = "Open full device-model spoofing";
+"极高风险：完整机型伪装" = "Extreme risk: Full device-model spoofing";
+"此功能同时修改产品、板号、CPU、监管型号和销售地区，可能导致 Face ID、听写、通信或启动异常。请先备份整机。" = "This changes the product, board, CPU, regulatory model, and sales region together. It may break Face ID, dictation, communication, or startup. Back up the entire device first.";
+"我了解风险，进入机型伪装" = "I understand the risks; open device-model spoofing";
+"仅对已核实的机型、板号、CPU 与监管型号组合写入。" = "Only verified model, board, CPU, and regulatory model combinations can be written.";
+"此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。" = "This fully spoofs the device identity and may affect Face ID, dictation, communication, and system stability. A full plist backup is created before writing.";
+"目标机型" = "Target model";
+"机型" = "Model";
+"销售地区代码，例如 LL / CH / JP" = "Sales region code, e.g. LL / CH / JP";
+"无可靠映射，不可写入" = "No reliable mapping; cannot write";
+"写入实验性机型伪装" = "Write experimental device-model spoof";
+"完整机型伪装 · 实验性" = "Full device-model spoofing · Experimental";
+"将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。" = "This changes ProductType, board, CPU, regulatory model, and sales region together. It may break Face ID, dictation, communication, or startup. Only known models can be written; a full backup is saved first.";
+"高风险：销售地区修改" = "High risk: Change sales region";
+"将把当前销售地区改为 LL/A。已知机型可匹配美版监管型号；未知地区的监管型号会保留原值。修改设备身份可能影响系统功能；请先备份。" = "The current sales region will be changed to LL/A. Known models can be matched to a US regulatory model; for unknown regions, the existing regulatory model is preserved. Changing device identity may affect system functions. Back up first.";
+"销售地区代码必须是 1–3 个英文字母" = "The sales region code must contain 1–3 English letters";
+"目标机型与销售地区缺少可靠监管型号映射，未写入" = "No reliable regulatory model mapping exists for this target model and sales region; nothing was written";
+"当前真实机型未列入已核实硬件表，未写入" = "The real device model is absent from the verified hardware table; nothing was written";
+"实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。" = "The experimental model, board, CPU, regulatory model, and sales region were written and verified. Fully restart the device.";
+"第二阶段已恢复真实机型并校验。请完整重启，测试 Face ID 与听写；千万不要打开「设置 → Siri」。" = "Stage 2 restored and verified the real model. Fully restart and test Face ID and dictation; do not open Settings → Siri.";

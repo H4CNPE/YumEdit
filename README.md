@@ -1,9 +1,10 @@
 # YumEdit
 
-**YumEdit 用于在已适配的国行与欧版 iPhone、iPad 上修改 MobileGestalt 销售区域，并启用 Apple Intelligence / Siri AI 相关设置。** 写入系统缓存仍有风险，使用前务必备份整机。外接屏扩展等未验证功能单独列在「实验性选项」中。界面参考 SideInstaller 的深色蓝色渐变与玻璃卡片；音效为独立合成。
+**YumEdit 用于在已适配的 iPhone、iPad 上修改 MobileGestalt 销售区域，并启用 Apple Intelligence / Siri AI 相关设置。** 写入系统缓存仍有风险，使用前务必备份整机。外接屏扩展等未验证功能单独列在「实验性选项」中。界面参考 SideInstaller 的深色蓝色渐变与玻璃卡片；音效为独立合成。
 
 ## 行为
 
+- **1.3.1 正式版（build 17）：**旧机型能力写入参考用户提供的 Strata 变更预览：将 `CacheData` 的国行限制、非国行及生成式模型能力三个已知槽位改为目标值，同时写入 `LL/LL/A`、整数 `SiriMode=2` 和 `A62OafQ85EJAiiqKn4agtg=1`。临时机型伪装为可选项，开启时只改 `ProductType`；恢复阶段从同设备历史备份恢复真实身份，保留能力与区域字段。已写入能力值的旧设备仍可重新进入两阶段流程，必要时补做临时机型伪装。检测到两个已存在的扩图能力键值异常时，主页提供一键备份修正。恢复机型后明确警告不要进入「设置 → Siri」。实验页提供完整机型、板号、CPU、监管型号及销售地区伪装；允许从已知的仅 ProductType 伪装状态继续进行完整伪装。已补齐 iPadOS 26/27 兼容旧 iPad 的板号和芯片识别；机型名称与 ProductType 并排显示，主页信息按钮直接显示版本和构建号，并按屏幕高度填充布局。监管型号无法唯一核实的目标组合拒绝自动伪装。**两阶段效果仍需更多真机验证。**
 - **1.3.0 旧机型两阶段试验：**在已映射的 iOS 27+ iPhone 11 至 iPhone 15/15 Plus 上，第一阶段核对真实机型与销售区域，备份后临时伪装为选定机型，写入 `LL`、`LL/A` 与 `SiriMode = 2`，完整重启并等待资源下载。用户确认下载完成后，第二阶段只从同设备、同 `CacheData` 和 `CacheUUID` 的可信历史备份恢复真实产品、板号、CPU 与原监管型号，保留当前销售区域和 SiriMode，再完整重启测试 Face ID、听写与 Apple Intelligence。找不到可信备份就拒绝自动恢复。**两阶段能否兼顾资源与功能尚待真机验证；下载进度本身不证明 Siri AI 已可用。**此流程不会写入或修改 `DeviceSupportsGenerativeModelSystems`。旧版 1.2.0/1.2.1 曾自动写入该字段；1.3.0 不会自动撤销既有修改。预设中的该字段快捷项已移除，直接字段编辑器仍允许用户自行编辑。
 - 原生 Siri AI iPhone：按 Apple 官方型号表与真实 `hw.machine` 精确对应，只改 `CacheExtra` 的国家码、销售区域与监管型号；状态卡不把缓存中缺少 SiriMode 等显式键误报为功能关闭。
 - **历史：1.2.1 旧机型方法重构，感谢 [@snow_femos](https://x.com/snow_femos) 打破长期沿用的 GestaltEdit 式硬件伪装思路。** 当时的流程不伪装产品、板号或 CPU，但自动写入 `DeviceSupportsGenerativeModelSystems = 1` 和 `SiriMode = 2`。用户在 iPhone 13 Pro 上观察到 Apple Intelligence 入口，但资源下载受阻；该旧流程已由 1.3.0 的两阶段试验取代。

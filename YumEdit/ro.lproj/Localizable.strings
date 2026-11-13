@@ -296,3 +296,49 @@
 "第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "Etapa 2 a restaurat identitatea reală. Repornește complet și testează Face ID, dictarea și Siri AI.";
 "旧机型请使用两阶段流程" = "Folosește procesul în două etape pentru dispozitive mai vechi";
 "我确认资源已下载完成" = "Confirm că descărcarea resurselor s-a încheiat";
+
+/* Strata-inspired experimental workflow and photo repair */
+"检测到扩图字段异常，点击修正" = "Este detectată o anomalie în câmpul de extindere a imaginii. Faceți clic pentru a o corecta.";
+"只修正已存在的两个扩图能力字段；写入前保存完整备份并读回校验。" = "Sunt corectate doar cele două câmpuri existente pentru capacitatea de extindere a imaginii; salvați o copie de rezervă completă înainte de a scrie și citiți înapoi pentru verificare.";
+"修正扩图字段" = "Câmp corect de extindere a imaginii";
+"写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。" = "Scrieți în zona SUA, SiriMode, capabilități de model generativ și trei sloturi CacheData. Modelul de camuflaj este optional; când este pornit, numai ProductType este modificat, ceea ce poate afecta Face ID și dictarea. Backup automat înainte de scriere; Testați descărcarea resurselor după repornirea completă.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID、听写与 Siri AI。" = "Folosit numai la selectarea modelului de camuflaj în prima etapă. Restaurați tipul de produs real din copia de rezervă istorică a aceluiași dispozitiv, păstrând regiunea SUA și câmpurile de capacitate. Respinge scrierea dacă nu se găsește o copie de rezervă de încredere; repornire completă după recuperare și testare Face ID, dictare și Siri AI. (ProductType)";
+"高风险：修正扩图字段" = "Risc ridicat: remediați câmpurile de extindere a imaginii";
+"仅当两个字段均存在且值异常时，写入 M1n2sAqf33NAOgZRGxQYBA=true 与 rb2tKZxIjOGm2tBmUQSLqQ=false。操作前自动备份，完成后需重启测试。" = "Scrieți M1n2sAqf33NAOgZRGxQYBA=true și rb2tKZxIjOGm2tBmUQSLqQ=false numai dacă ambele câmpuri sunt prezente și au valori anormale. Backup automat înainte de operare și reporniți testul după finalizare.";
+"仅旧机型可使用此修正" = "Această remediere este disponibilă numai pe modelele mai vechi";
+"扩图字段已备份、修正并读回校验。请完整重启后测试照片功能。" = "Câmpurile de imagine extinse au fost copiate de rezervă, corectate și citite înapoi pentru verificare. Vă rugăm să testați funcția foto după o repornire completă.";
+"能力字段已写入并校验。请完整重启，检查资源下载与功能。" = "Câmpurile de capacitate au fost scrise și verificate. Vă rugăm să reporniți complet și să verificați descărcările de resurse și funcțiile.";
+
+/* Siri settings warning after restoring real model */
+"高风险：临时伪装机型" = "Risc ridicat: model de camuflaj temporar";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面" = "După restaurarea modelului real, nu deschideți pagina „Setări → Siri”.";
+"打开该页面可能重新检查设备资格，使已下载的 Siri AI 资源失效。请只通过语音测试，勿进入 Siri 设置。" = "Deschiderea acestei pagini poate verifica din nou eligibilitatea dispozitivului, invalidând resursele Siri AI descărcate. Vă rugăm să treceți doar testul de voce și să nu introduceți setările Siri.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。" = "Folosit numai la selectarea modelului de camuflaj în prima etapă. Restaurați tipul de produs real din copia de rezervă istorică a aceluiași dispozitiv, păstrând regiunea SUA și câmpurile de capacitate. Deny scrie dacă nu se găsește o copie de rezervă de încredere; restaurați și reporniți complet și testați Face ID și dictarea. Nu intrați niciodată în „Setări → Siri”. (ProductType)";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面。它可能重新检查设备资格，使下载的资源失效。恢复后完整重启，只通过语音测试 Siri。" = "După restaurarea modelului real, nu deschideți pagina „Setări → Siri”. Poate verifica din nou eligibilitatea dispozitivului, invalidând resursele descărcate. După recuperare, faceți o repornire completă și testați Siri doar cu vocea.";
+"千万不要打开「设置 → Siri」" = "Nu deschide niciodată „Setări → Siri”";
+"已恢复真实机型。请完整重启设备。进入 Siri 设置可能触发设备资格重新检查；只通过语音测试 Siri，并检查 Face ID 和听写。" = "Modelul real a fost restaurat. Vă rugăm să reporniți complet dispozitivul. Accesul în setările Siri poate declanșa o reverificare a eligibilității dispozitivului; testați Siri numai prin voce și verificați Face ID și dictarea.";
+"我记住了" = "Îmi amintesc";
+
+/* Experimental full spoofing and general sales regions */
+"完整机型伪装" = "Camuflaj model complet";
+"选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。" = "Selectați modelul țintă și regiunea de vânzare și completați automat numărul plăcii verificate, procesorul și modelul de reglementare. Combinația necunoscută respinge scrierea.";
+"进入完整机型伪装" = "Introduceți camuflajul complet al modelului";
+"极高风险：完整机型伪装" = "Risc extrem de ridicat: deghizare model complet";
+"此功能同时修改产品、板号、CPU、监管型号和销售地区，可能导致 Face ID、听写、通信或启动异常。请先备份整机。" = "Această funcție modifică simultan produsul, numărul plăcii, procesorul, modelul de reglementare și regiunea de vânzări, ceea ce poate cauza Face ID, dictare, comunicare sau anomalii de pornire. Mai întâi, faceți o copie de rezervă a întregii mașini.";
+"我了解风险，进入机型伪装" = "Înțeleg riscurile și intru în camuflajul modelului";
+"仅对已核实的机型、板号、CPU 与监管型号组合写入。" = "Scrieți doar combinația verificată de model, număr de placă, procesor și model de reglementare.";
+"此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。" = "Această caracteristică va ascunde complet identitatea modelului și poate afecta Face ID, dictarea, comunicarea și stabilitatea sistemului. Se face o copie de rezervă pentru întregul plist înainte de a scrie.";
+"目标机型" = "Model țintă";
+"机型" = "Model";
+"销售地区代码，例如 LL / CH / JP" = "Codul zonei de vânzări, cum ar fi LL/CH/JP";
+"无可靠映射，不可写入" = "Fără cartografiere fiabilă, nu se poate scrie";
+"写入实验性机型伪装" = "Scrieți camuflajul modelului experimental";
+"完整机型伪装 · 实验性" = "Camuflaj model complet · Experimental";
+"将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。" = "Tipul de produs, numărul plăcii, procesorul, modelul de reglementare și regiunea de vânzare vor fi rescrise în același timp. Poate cauza Face ID, dictare, comunicare sau anomalii de pornire. Scrierea este permisă numai dacă modelul este cunoscut; salvați o copie de rezervă completă înainte de a continua. (ProductType)";
+"高风险：销售地区修改" = "Risc ridicat: modificarea teritoriului de vânzare";
+"将把当前销售地区改为 LL/A。已知机型可匹配美版监管型号；未知地区的监管型号会保留原值。修改设备身份可能影响系统功能；请先备份。" = "Se va schimba regiunea actuală de vânzări în LL/A. Modelele cunoscute se pot potrivi cu modelul de reglementare din SUA; modelele de reglementare din regiuni necunoscute vor păstra valoarea inițială. Modificarea identității dispozitivului poate afecta funcțiile sistemului; te rog mai intai sa faci backup.";
+"销售地区代码必须是 1–3 个英文字母" = "Codul zonei de vânzări trebuie să aibă 1–3 litere în limba engleză";
+"目标机型与销售地区缺少可靠监管型号映射，未写入" = "Modelul țintă și regiunea de vânzări nu au o cartografiere fiabilă a modelului de reglementare și nu au fost scrise.";
+"当前真实机型未列入已核实硬件表，未写入" = "Modelul real actual nu este listat în tabelul hardware verificat și nu a fost scris.";
+"实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。" = "Modelul experimental, numărul plăcii, procesorul, modelul de reglementare și regiunea de vânzări au fost scrise și verificate; va rog reporniti complet.";
+"第二阶段已恢复真实机型并校验。请完整重启，测试 Face ID 与听写；千万不要打开「设置 → Siri」。" = "În a doua etapă, modelul real a fost restaurat și verificat. Vă rugăm să reporniți complet pentru a testa Face ID și dictarea; nu deschideți „Setări → Siri”.";

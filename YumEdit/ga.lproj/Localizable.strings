@@ -296,3 +296,49 @@
 "第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "D’athchóirigh céim 2 an fhíoraitheantas. Atosaigh go hiomlán agus tástáil Face ID, deachtú agus Siri AI.";
 "旧机型请使用两阶段流程" = "Úsáid an próiseas dhá chéim do ghléasanna níos sine";
 "我确认资源已下载完成" = "Deimhním go bhfuil íoslódáil na n-acmhainní críochnaithe";
+
+/* Strata-inspired experimental workflow and photo repair */
+"检测到扩图字段异常，点击修正" = "Braitheadh ​​mínormáltacht sa réimse leathnú íomhá. Cliceáil chun é a cheartú.";
+"只修正已存在的两个扩图能力字段；写入前保存完整备份并读回校验。" = "Níl ach an dá réimse cumais leathnú íomhá atá ann cheana féin á gceartú; Sábháil cúltaca iomlán roimh scríobh agus léigh ar ais le haghaidh fíorú.";
+"修正扩图字段" = "Réimse leathnú ceart íomhá";
+"写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。" = "Scríobh chuig limistéar SAM, SiriMode, cumais samhail giniúna agus trí shliotán CacheData. Tá duaithníocht mhúnla roghnach; nuair a chuirtear ar siúl é, ní athraítear ach an Cineál Táirge, rud a d'fhéadfadh cur isteach ar Face ID agus ar dheachtú. Cúltaca uathoibríoch roimh scríobh; íoslódáil acmhainn tástála tar éis atosú iomlán. (ProductType)";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID、听写与 Siri AI。" = "Ní úsáidtear é ach amháin nuair a bhíonn duaithníocht mhúnla á roghnú sa chéad chéim. Athchóirigh an Cineál Táirge fíor ó chúltaca stairiúil an fheiste chéanna, ag coinneáil réigiún SAM agus réimsí cumais. Scríobh a dhiúltú mura bhfaightear aon chúltaca iontaofa; atosaigh iomlán tar éis aisghabháil agus tástáil Aghaidh ID, deachtú, agus Siri AI. (ProductType)";
+"高风险：修正扩图字段" = "Riosca ard: réitigh réimsí fairsingithe íomhá";
+"仅当两个字段均存在且值异常时，写入 M1n2sAqf33NAOgZRGxQYBA=true 与 rb2tKZxIjOGm2tBmUQSLqQ=false。操作前自动备份，完成后需重启测试。" = "Scríobh M1n2sAqf33NAOgZRGxQYBA=fíor agus rb2tKZxIjOGm2tBmUQSLqQ=bréagach amháin má tá an dá réimse i láthair agus má tá luachanna neamhghnácha acu. Cúltaca go huathoibríoch roimh oibriú agus atosú ar an tástáil tar éis críochnú.";
+"仅旧机型可使用此修正" = "Níl an socrú seo ar fáil ach ar mhúnlaí níos sine";
+"扩图字段已备份、修正并读回校验。请完整重启后测试照片功能。" = "Rinneadh na réimsí íomhá méadaithe a chúltacú, a cheartú agus a léamh ar ais lena bhfíorú. Déan tástáil ar fheidhm an ghrianghraif tar éis atosú iomlán.";
+"能力字段已写入并校验。请完整重启，检查资源下载与功能。" = "Scríobhadh agus fíoraíodh réimsí cumais. Atosaigh go hiomlán le do thoil agus seiceáil íoslódálacha acmhainní agus feidhmeanna.";
+
+/* Siri settings warning after restoring real model */
+"高风险：临时伪装机型" = "Riosca Ard: Múnla Duaithníochta Sealadach";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面" = "Tar éis an tsamhail fíor a athchóiriú, ná oscail an leathanach \"Settings → Siri\".";
+"打开该页面可能重新检查设备资格，使已下载的 Siri AI 资源失效。请只通过语音测试，勿进入 Siri 设置。" = "Má osclaíonn tú an leathanach seo seans go n-athsheiceáiltear incháilitheacht an ghléis, rud a fhágann go mbeidh acmhainní Siri AI íoslódála neamhbhailí. Ní gá ach pas a fháil sa tástáil gutha agus ná cuir isteach socruithe Siri.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。" = "Ní úsáidtear é ach amháin nuair a bhíonn duaithníocht mhúnla á roghnú sa chéad chéim. Athchóirigh an Cineál Táirge fíor ó chúltaca stairiúil an fheiste chéanna, ag coinneáil réigiún SAM agus réimsí cumais. Scríobhann séanadh mura bhfaightear aon chúltaca iontaofa; Aitheantas Aghaidhe agus deachtú a athchóiriú agus a atosú go hiomlán agus a thástáil. Ná téigh isteach i \"Socruithe → Siri\". (ProductType)";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面。它可能重新检查设备资格，使下载的资源失效。恢复后完整重启，只通过语音测试 Siri。" = "Tar éis an tsamhail fíor a athchóiriú, ná oscail an leathanach \"Settings → Siri\". D'fhéadfadh sé incháilitheacht gléas a athsheiceáil, rud a fhágann go mbeidh acmhainní íoslódála neamhbhailí. Tar éis aisghabháil, déan atosaigh iomlán agus tástáil Siri le do ghuth amháin.";
+"千万不要打开「设置 → Siri」" = "Ná hoscail \"Socruithe → Siri\" riamh";
+"已恢复真实机型。请完整重启设备。进入 Siri 设置可能触发设备资格重新检查；只通过语音测试 Siri，并检查 Face ID 和听写。" = "Tá an tsamhail fíor athchóirithe. Le do thoil Atosaigh an gléas go hiomlán. Má théann tú isteach i socruithe Siri d'fhéadfadh sé go spreagfaí athsheiceáil incháilitheachta gléas; tástáil Siri le guth amháin, agus seiceáil Aghaidh ID agus deachtú.";
+"我记住了" = "Is cuimhin liom";
+
+/* Experimental full spoofing and general sales regions */
+"完整机型伪装" = "Comhlánaigh duaithníocht samhail";
+"选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。" = "Roghnaigh an tsamhail sprioc agus an réigiún díolacháin, agus líon isteach an bord fíoraithe, LAP agus múnla rialála go huathoibríoch. Diúltaíonn teaglaim anaithnid scríobh.";
+"进入完整机型伪装" = "Cuir isteach duaithníocht mhúnla iomlán";
+"极高风险：完整机型伪装" = "Riosca Fíor-Ard: Clúdach Samhail Críochnaithe";
+"此功能同时修改产品、板号、CPU、监管型号和销售地区，可能导致 Face ID、听写、通信或启动异常。请先备份整机。" = "Athraíonn an fheidhm seo an táirge, an líon boird, an LAP, an tsamhail rialála, agus an réigiún díolacháin ag an am céanna, rud a d'fhéadfadh a bheith ina chúis le neamhghnáchaíochtaí Aghaidh ID, deachtú, cumarsáide nó tosaithe. Le do thoil cúltaca an meaisín ar fad ar dtús.";
+"我了解风险，进入机型伪装" = "Tuigim na rioscaí agus cuirim isteach duaithníocht mhúnla";
+"仅对已核实的机型、板号、CPU 与监管型号组合写入。" = "Ná scríobh ach an teaglaim fhíoraithe de mhúnla, uimhir chlár, LAP agus samhail rialála.";
+"此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。" = "Déanfaidh an ghné seo céannacht an mhúnla a cheilt go hiomlán agus féadfaidh sé cur isteach ar Face ID, deachtú, cumarsáid agus cobhsaíocht an chórais. Tá an plist iomlán cúltaca roimh scríobh.";
+"目标机型" = "Múnla sprice";
+"机型" = "Múnla";
+"销售地区代码，例如 LL / CH / JP" = "Cód limistéir díolacháin, mar LL/CH/JP";
+"无可靠映射，不可写入" = "Uimh mapáil iontaofa, ní inscríofa";
+"写入实验性机型伪装" = "Scríobh samhail thurgnamhach duaithníochta";
+"完整机型伪装 · 实验性" = "duaithníocht samhail iomlán · Turgnamhach";
+"将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。" = "Déanfar Cineál Táirge, uimhir boird, LAP, múnla rialála agus réigiún díolacháin a athscríobh ag an am céanna. D’fhéadfadh mínormáltachtaí Face ID, deachtú, cumarsáide nó tosaithe a chur faoi deara. Ní cheadaítear scríbhneoireacht ach amháin má tá an tsamhail ar eolas; shábháil cúltaca iomlán roimh dul ar aghaidh. (ProductType)";
+"高风险：销售地区修改" = "Riosca Ard: Mionathrú ar an gCríoch Díolacháin";
+"将把当前销售地区改为 LL/A。已知机型可匹配美版监管型号；未知地区的监管型号会保留原值。修改设备身份可能影响系统功能；请先备份。" = "Athrófar an réigiún díolacháin reatha go LL/A. Is féidir le samhlacha aitheanta samhail rialála SAM a mheaitseáil; Coinneoidh samhlacha rialála i réigiúin anaithnid an luach bunaidh. Má dhéantar céannacht an fheiste a mhodhnú, féadfaidh sé difear a dhéanamh d'fheidhmeanna an chórais; le do thoil cúltaca ar dtús.";
+"销售地区代码必须是 1–3 个英文字母" = "Ní mór 1-3 litir Bhéarla a bheith i gcód an limistéir díolacháin";
+"目标机型与销售地区缺少可靠监管型号映射，未写入" = "Tá easpa mapála samhla rialála iontaofa ar an tsamhail sprice agus ar an réigiún díolacháin agus níl siad scríofa.";
+"当前真实机型未列入已核实硬件表，未写入" = "Níl an tsamhail iarbhír reatha liostaithe sa tábla crua-earraí fíoraithe agus níl sé scríofa.";
+"实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。" = "Scríobhadh agus fíoraíodh an tsamhail turgnamhach, uimhir an bhoird, an LAP, an tsamhail rialála agus an réigiún díolacháin; atosú go hiomlán le do thoil.";
+"第二阶段已恢复真实机型并校验。请完整重启，测试 Face ID 与听写；千万不要打开「设置 → Siri」。" = "Sa dara céim, tá an tsamhail fíor athchóirithe agus fíoraithe. Atosaigh go hiomlán le do thoil chun Face ID agus deachtú a thástáil; ná oscail \"Socruithe → Siri\".";

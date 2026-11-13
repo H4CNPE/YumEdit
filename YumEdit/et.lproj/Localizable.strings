@@ -296,3 +296,49 @@
 "第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "2. etapp taastas tegeliku identiteedi. Taaskäivita täielikult ning testi Face ID-d, dikteerimist ja Siri AI-d.";
 "旧机型请使用两阶段流程" = "Kasuta vanematel seadmetel kaheetapilist protsessi";
 "我确认资源已下载完成" = "Kinnitan, et ressursside allalaadimine on lõppenud";
+
+/* Strata-inspired experimental workflow and photo repair */
+"检测到扩图字段异常，点击修正" = "Tuvastatakse kõrvalekalle kujutise laiendusväljas. Klõpsake selle parandamiseks.";
+"只修正已存在的两个扩图能力字段；写入前保存完整备份并读回校验。" = "Korrigeeritakse ainult kahte olemasolevat pildilaiendusvõimaluse välja; salvestage enne kirjutamist täielik varukoopia ja lugege kontrollimiseks uuesti.";
+"修正扩图字段" = "Õige pildi laiendusväli";
+"写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。" = "Kirjutage USA piirkonda, SiriMode'i, generatiivse mudeli võimalusi ja kolme CacheData pesa. Mudeli kamuflaaž on valikuline; sisselülitamisel muudetakse ainult tootetüüpi, mis võib mõjutada näo ID-d ja dikteerimist. Automaatne varundamine enne kirjutamist; testressursi allalaadimine pärast täielikku taaskäivitamist. (ProductType)";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID、听写与 Siri AI。" = "Kasutatakse ainult mudeli kamuflaaži valimisel esimeses etapis. Taastage tegelik ProductType sama seadme ajaloolisest varukoopiast, säilitades USA piirkonna ja võimaluste väljad. Keela kirjutamine, kui usaldusväärset varukoopiat ei leitud; pärast taastamist täielik taaskäivitamine ja näo ID, dikteerimise ja Siri AI testimine.";
+"高风险：修正扩图字段" = "Suur risk: parandage pildi laiendusväljad";
+"仅当两个字段均存在且值异常时，写入 M1n2sAqf33NAOgZRGxQYBA=true 与 rb2tKZxIjOGm2tBmUQSLqQ=false。操作前自动备份，完成后需重启测试。" = "Kirjutage M1n2sAqf33NAOgZRGxQYBA=true ja rb2tKZxIjOGm2tBmUQSLqQ=false ainult siis, kui mõlemad väljad on olemas ja nende väärtused on ebanormaalsed. Varundage enne kasutamist automaatselt ja taaskäivitage test pärast lõpetamist.";
+"仅旧机型可使用此修正" = "See parandus on saadaval ainult vanematel mudelitel";
+"扩图字段已备份、修正并读回校验。请完整重启后测试照片功能。" = "Laiendatud pildiväljad on varundatud, parandatud ja kontrollimiseks uuesti läbi loetud. Pärast täielikku taaskäivitamist testige fotofunktsiooni.";
+"能力字段已写入并校验。请完整重启，检查资源下载与功能。" = "Võimaluste väljad on kirjutatud ja kontrollitud. Taaskäivitage täielikult ja kontrollige ressursside allalaadimisi ja funktsioone.";
+
+/* Siri settings warning after restoring real model */
+"高风险：临时伪装机型" = "Kõrge risk: ajutine kamuflaažimudel";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面" = "Pärast tegeliku mudeli taastamist ärge avage lehekülge \"Seaded → Siri\".";
+"打开该页面可能重新检查设备资格，使已下载的 Siri AI 资源失效。请只通过语音测试，勿进入 Siri 设置。" = "Selle lehe avamine võib uuesti kontrollida seadme sobivust, mis muudab allalaaditud Siri AI ressursid kehtetuks. Läbige ainult hääletest ja ärge sisestage Siri seadeid.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。" = "Kasutatakse ainult mudeli kamuflaaži valimisel esimeses etapis. Taastage tegelik ProductType sama seadme ajaloolisest varukoopiast, säilitades USA piirkonna ja võimaluste väljad. Keela kirjutab, kui usaldusväärset varukoopiat ei leitud; taastage ja taaskäivitage täielikult ning testige näo ID-d ja dikteerimist. Ärge kunagi minge menüüsse \"Seaded → Siri\".";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面。它可能重新检查设备资格，使下载的资源失效。恢复后完整重启，只通过语音测试 Siri。" = "Pärast tegeliku mudeli taastamist ärge avage lehekülge \"Seaded → Siri\". See võib uuesti kontrollida seadme sobivust, muutes allalaaditud ressursid kehtetuks. Pärast taastumist tehke täielik taaskäivitus ja testige Siri oma häälega.";
+"千万不要打开「设置 → Siri」" = "Ärge kunagi avage jaotist Seaded → Siri";
+"已恢复真实机型。请完整重启设备。进入 Siri 设置可能触发设备资格重新检查；只通过语音测试 Siri，并检查 Face ID 和听写。" = "Päris mudel on taastatud. Taaskäivitage seade täielikult. Siri seadetesse sisenemine võib käivitada seadme sobivuse uuesti kontrollimise; testige Siri ainult häälega ning kontrollige näo ID-d ja dikteerimist.";
+"我记住了" = "ma mäletan";
+
+/* Experimental full spoofing and general sales regions */
+"完整机型伪装" = "Täielik mudeli kamuflaaž";
+"选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。" = "Valige sihtmudel ja müügipiirkond ning sisestage automaatselt kinnitatud plaadi number, protsessor ja reguleeriv mudel. Tundmatu kombinatsioon keeldub kirjutamisest.";
+"进入完整机型伪装" = "Sisestage täielik mudeli kamuflaaž";
+"极高风险：完整机型伪装" = "Äärmiselt kõrge risk: täielik mudeli maskeering";
+"此功能同时修改产品、板号、CPU、监管型号和销售地区，可能导致 Face ID、听写、通信或启动异常。请先备份整机。" = "See funktsioon muudab samaaegselt toodet, plaadi numbrit, protsessorit, reguleerivat mudelit ja müügipiirkonda, mis võib põhjustada näo ID-d, dikteerimist, suhtlust või käivitushäireid. Esmalt varundage kogu masin.";
+"我了解风险，进入机型伪装" = "Mõistan riske ja astun modellikamuflaaži";
+"仅对已核实的机型、板号、CPU 与监管型号组合写入。" = "Kirjutage ainult mudeli, plaadi numbri, protsessori ja reguleeriva mudeli kontrollitud kombinatsioon.";
+"此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。" = "See funktsioon varjab mudeli identiteedi täielikult ja võib mõjutada näo ID-d, dikteerimist, suhtlust ja süsteemi stabiilsust. Täielik loend varundatakse enne kirjutamist.";
+"目标机型" = "Sihtmudel";
+"机型" = "Mudel";
+"销售地区代码，例如 LL / CH / JP" = "Müügipiirkonna kood, nt LL/CH/JP";
+"无可靠映射，不可写入" = "Pole usaldusväärset kaardistamist, pole kirjutatav";
+"写入实验性机型伪装" = "Kirjutage eksperimentaalne mudel kamuflaaž";
+"完整机型伪装 · 实验性" = "Täielik mudeli kamuflaaž · Eksperimentaalne";
+"将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。" = "Tootetüüp, plaadi number, protsessor, reguleeriv mudel ja müügipiirkond kirjutatakse ümber samal ajal. Võib põhjustada Face ID, dikteerimise, suhtluse või käivitamise häireid. Kirjutamine on lubatud ainult siis, kui mudel on teada; enne jätkamist salvestage täielik varukoopia. (ProductType)";
+"高风险：销售地区修改" = "Kõrge risk: müügiterritooriumi muutmine";
+"将把当前销售地区改为 LL/A。已知机型可匹配美版监管型号；未知地区的监管型号会保留原值。修改设备身份可能影响系统功能；请先备份。" = "Muudab praeguse müügipiirkonna LL/A-ks. Tuntud mudelid võivad ühtida USA regulatiivse mudeliga; regulatiivsed mudelid tundmatutes piirkondades säilitavad algse väärtuse. Seadme identiteedi muutmine võib mõjutada süsteemi funktsioone; palun varundage kõigepealt.";
+"销售地区代码必须是 1–3 个英文字母" = "Müügipiirkonna koodis peab olema 1–3 ingliskeelset tähte";
+"目标机型与销售地区缺少可靠监管型号映射，未写入" = "Sihtmudelil ja müügipiirkonnal puudub usaldusväärne regulatiivse mudeli kaardistus ja need pole kirjutatud.";
+"当前真实机型未列入已核实硬件表，未写入" = "Praegust tegelikku mudelit ei ole kinnitatud riistvaratabelis loetletud ja see pole kirjutatud.";
+"实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。" = "Eksperimentaalne mudel, plaadi number, protsessor, regulatiivne mudel ja müügipiirkond on kirjutatud ja kontrollitud; palun taaskäivitage täielikult.";
+"第二阶段已恢复真实机型并校验。请完整重启，测试 Face ID 与听写；千万不要打开「设置 → Siri」。" = "Teises etapis on tegelik mudel taastatud ja kontrollitud. Face ID ja dikteerimise testimiseks taaskäivitage täielikult; ärge avage \"Seaded → Siri\".";

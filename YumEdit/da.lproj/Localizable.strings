@@ -296,3 +296,49 @@
 "第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "Trin 2 har gendannet den rigtige identitet. Genstart helt, og test Face ID, diktering og Siri AI.";
 "旧机型请使用两阶段流程" = "Brug processen med to trin til ældre enheder";
 "我确认资源已下载完成" = "Jeg bekræfter, at ressourcerne er hentet";
+
+/* Strata-inspired experimental workflow and photo repair */
+"检测到扩图字段异常，点击修正" = "En abnormitet i billedudvidelsesfeltet er registreret. Klik for at rette det.";
+"只修正已存在的两个扩图能力字段；写入前保存完整备份并读回校验。" = "Kun de to eksisterende felter med billedudvidelsesevne korrigeres; gem en komplet sikkerhedskopi, før du skriver, og læs tilbage til bekræftelse.";
+"修正扩图字段" = "Korrekt billedudvidelsesfelt";
+"写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。" = "Skriv til det amerikanske område, SiriMode, generative modelfunktioner og tre CacheData-slots. Model camouflage er valgfri; når den er slået til, ændres kun ProductTypen, hvilket kan påvirke Face ID og diktering. Automatisk backup før skrivning; test ressource download efter fuldstændig genstart.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID、听写与 Siri AI。" = "Anvendes kun ved valg af modelcamouflage i første fase. Gendan den rigtige ProductType fra den historiske sikkerhedskopi af den samme enhed, og behold den amerikanske region og kapacitetsfelter. Afvis skrivning, hvis der ikke findes nogen pålidelig backup; komplet genstart efter gendannelse og test Face ID, diktering og Siri AI.";
+"高风险：修正扩图字段" = "Høj risiko: Ret billedudvidelsesfelter";
+"仅当两个字段均存在且值异常时，写入 M1n2sAqf33NAOgZRGxQYBA=true 与 rb2tKZxIjOGm2tBmUQSLqQ=false。操作前自动备份，完成后需重启测试。" = "Skriv kun M1n2sAqf33NAOgZRGxQYBA=sand og rb2tKZxIjOGm2tBmUQSLqQ=falsk, hvis begge felter er til stede og har unormale værdier. Sikkerhedskopier automatisk før drift og genstart testen efter afslutning.";
+"仅旧机型可使用此修正" = "Denne rettelse er kun tilgængelig på ældre modeller";
+"扩图字段已备份、修正并读回校验。请完整重启后测试照片功能。" = "De udvidede billedfelter er blevet sikkerhedskopieret, rettet og læst tilbage til verifikation. Test venligst fotofunktionen efter en fuldstændig genstart.";
+"能力字段已写入并校验。请完整重启，检查资源下载与功能。" = "Kapacitetsfelter er blevet skrevet og verificeret. Genstart venligst fuldstændigt og kontroller ressourcedownloads og funktioner.";
+
+/* Siri settings warning after restoring real model */
+"高风险：临时伪装机型" = "Høj risiko: Midlertidig camouflagemodel";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面" = "Efter gendannelse af den rigtige model skal du ikke åbne siden \"Indstillinger → Siri\".";
+"打开该页面可能重新检查设备资格，使已下载的 Siri AI 资源失效。请只通过语音测试，勿进入 Siri 设置。" = "Åbning af denne side kan kontrollere enhedens berettigelse igen, hvilket vil ugyldiggøre downloadede Siri AI-ressourcer. Bestå kun stemmetesten og gå ikke ind i Siri-indstillingerne.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。" = "Anvendes kun ved valg af modelcamouflage i første fase. Gendan den rigtige ProductType fra den historiske sikkerhedskopi af den samme enhed, og behold den amerikanske region og kapacitetsfelter. Afvis skriver, hvis der ikke findes nogen pålidelig backup; gendan og genstart fuldstændigt og test Face ID og diktering. Gå aldrig ind i \"Indstillinger → Siri\".";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面。它可能重新检查设备资格，使下载的资源失效。恢复后完整重启，只通过语音测试 Siri。" = "Efter gendannelse af den rigtige model skal du ikke åbne siden \"Indstillinger → Siri\". Det kan kontrollere enhedens berettigelse igen og ugyldiggøre downloadede ressourcer. Efter gendannelse skal du udføre en fuld genstart og teste Siri med kun din stemme.";
+"千万不要打开「设置 → Siri」" = "Åbn aldrig \"Indstillinger → Siri\"";
+"已恢复真实机型。请完整重启设备。进入 Siri 设置可能触发设备资格重新检查；只通过语音测试 Siri，并检查 Face ID 和听写。" = "Den rigtige model er blevet restaureret. Genstart venligst enheden fuldstændigt. Hvis du går ind i Siri-indstillinger, kan det udløse en genkontrol af enhedsberettigelse; test Siri kun med stemmen, og tjek Face ID og diktering.";
+"我记住了" = "Jeg husker";
+
+/* Experimental full spoofing and general sales regions */
+"完整机型伪装" = "Komplet model camouflage";
+"选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。" = "Vælg målmodel og salgsregion, og udfyld automatisk det verificerede bordnummer, CPU og reguleringsmodel. Ukendt kombination afviser skrivning.";
+"进入完整机型伪装" = "Indtast komplet model camouflage";
+"极高风险：完整机型伪装" = "Ekstremt høj risiko: Komplet modelforklædning";
+"此功能同时修改产品、板号、CPU、监管型号和销售地区，可能导致 Face ID、听写、通信或启动异常。请先备份整机。" = "Denne funktion ændrer samtidigt produktet, kortnummeret, CPU'en, reguleringsmodel og salgsregion, hvilket kan forårsage Face ID, diktering, kommunikation eller opstartsabnormiteter. Sikkerhedskopier venligst hele maskinen først.";
+"我了解风险，进入机型伪装" = "Jeg forstår risiciene og går ind i modelcamouflage";
+"仅对已核实的机型、板号、CPU 与监管型号组合写入。" = "Skriv kun den verificerede kombination af model, kortnummer, CPU og regulatorisk model.";
+"此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。" = "Denne funktion vil fuldstændig skjule modelidentiteten og kan påvirke Face ID, diktering, kommunikation og systemstabilitet. Den komplette plist sikkerhedskopieres før skrivning.";
+"目标机型" = "Målmodel";
+"机型" = "Model";
+"销售地区代码，例如 LL / CH / JP" = "Salgsområdenummer, såsom LL/CH/JP";
+"无可靠映射，不可写入" = "Ingen pålidelig kortlægning, ikke skrivbar";
+"写入实验性机型伪装" = "Skriv eksperimentel modelcamouflage";
+"完整机型伪装 · 实验性" = "Komplet modelcamouflage · Eksperimentel";
+"将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。" = "Produkttype, tavlenummer, CPU, reguleringsmodel og salgsregion vil blive omskrevet på samme tid. Kan forårsage Face ID, diktering, kommunikation eller opstartsabnormiteter. Det er kun tilladt at skrive, hvis modellen er kendt; gem en komplet sikkerhedskopi, før du fortsætter. (ProductType)";
+"高风险：销售地区修改" = "Høj risiko: Ændring af salgsområde";
+"将把当前销售地区改为 LL/A。已知机型可匹配美版监管型号；未知地区的监管型号会保留原值。修改设备身份可能影响系统功能；请先备份。" = "Vil ændre den nuværende salgsregion til LL/A. Kendte modeller kan matche den amerikanske reguleringsmodel; regulatoriske modeller i ukendte regioner vil bevare den oprindelige værdi. Ændring af enhedens identitet kan påvirke systemfunktioner; sikkerhedskopier venligst først.";
+"销售地区代码必须是 1–3 个英文字母" = "Salgsområdenummer skal være 1-3 engelske bogstaver";
+"目标机型与销售地区缺少可靠监管型号映射，未写入" = "Målmodellen og salgsregionen mangler pålidelig regulatorisk modelkortlægning og er ikke skrevet.";
+"当前真实机型未列入已核实硬件表，未写入" = "Den aktuelle rigtige model er ikke opført i den verificerede hardwaretabel og er ikke blevet skrevet.";
+"实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。" = "Den eksperimentelle model, tavlenummer, CPU, reguleringsmodel og salgsregion er blevet skrevet og verificeret; genstart venligst fuldstændigt.";
+"第二阶段已恢复真实机型并校验。请完整重启，测试 Face ID 与听写；千万不要打开「设置 → Siri」。" = "I anden fase er den rigtige model blevet gendannet og verificeret. Genstart venligst for at teste Face ID og diktering; åbn ikke \"Indstillinger → Siri\".";

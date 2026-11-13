@@ -296,3 +296,49 @@
 "第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "L’étape 2 a restauré la véritable identité. Redémarrez complètement et testez Face ID, la dictée et Siri AI.";
 "旧机型请使用两阶段流程" = "Utilisez la procédure en deux étapes pour les anciens appareils";
 "我确认资源已下载完成" = "Je confirme que le téléchargement des ressources est terminé";
+
+/* Strata-inspired experimental workflow and photo repair */
+"检测到扩图字段异常，点击修正" = "Une anomalie dans le champ d'expansion de l'image est détectée. Cliquez pour le corriger.";
+"只修正已存在的两个扩图能力字段；写入前保存完整备份并读回校验。" = "Seuls les deux champs de capacité d'expansion d'image existants sont corrigés ; enregistrez une sauvegarde complète avant d'écrire et de relire pour vérification.";
+"修正扩图字段" = "Corriger le champ d'expansion de l'image";
+"写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。" = "Écrivez dans la zone américaine, SiriMode, capacités de modèle génératif et trois emplacements CacheData. Le camouflage du modèle est facultatif ; lorsqu'il est activé, seul le ProductType est modifié, ce qui peut affecter Face ID et la dictée. Sauvegarde automatique avant écriture ; tester le téléchargement des ressources après un redémarrage complet.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID、听写与 Siri AI。" = "Utilisé uniquement lors de la sélection du camouflage du modèle dans la première étape. Restaurez le véritable ProductType à partir de la sauvegarde historique du même appareil, en conservant les champs de région et de capacité des États-Unis. Refuser l'écriture si aucune sauvegarde fiable n'est trouvée ; redémarrez complètement après la récupération et testez Face ID, la dictée et Siri AI.";
+"高风险：修正扩图字段" = "Risque élevé : corriger les champs d'expansion de l'image";
+"仅当两个字段均存在且值异常时，写入 M1n2sAqf33NAOgZRGxQYBA=true 与 rb2tKZxIjOGm2tBmUQSLqQ=false。操作前自动备份，完成后需重启测试。" = "Écrivez M1n2sAqf33NAOgZRGxQYBA=true et rb2tKZxIjOGm2tBmUQSLqQ=false uniquement si les deux champs sont présents et ont des valeurs anormales. Sauvegardez automatiquement avant l'opération et redémarrez le test une fois terminé.";
+"仅旧机型可使用此修正" = "Ce correctif n'est disponible que sur les anciens modèles";
+"扩图字段已备份、修正并读回校验。请完整重启后测试照片功能。" = "Les champs d'image développés ont été sauvegardés, corrigés et relus pour vérification. Veuillez tester la fonction photo après un redémarrage complet.";
+"能力字段已写入并校验。请完整重启，检查资源下载与功能。" = "Les champs de capacité ont été rédigés et vérifiés. Veuillez redémarrer complètement et vérifier les téléchargements de ressources et les fonctions.";
+
+/* Siri settings warning after restoring real model */
+"高风险：临时伪装机型" = "Risque élevé : modèle de camouflage temporaire";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面" = "Après avoir restauré le modèle réel, n'ouvrez pas la page \"Paramètres → Siri\"";
+"打开该页面可能重新检查设备资格，使已下载的 Siri AI 资源失效。请只通过语音测试，勿进入 Siri 设置。" = "L'ouverture de cette page peut revérifier l'éligibilité de l'appareil, invalidant ainsi les ressources Siri AI téléchargées. Veuillez réussir uniquement le test vocal et ne pas entrer dans les paramètres Siri.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。" = "Utilisé uniquement lors de la sélection du camouflage du modèle dans la première étape. Restaurez le véritable ProductType à partir de la sauvegarde historique du même appareil, en conservant les champs de région et de capacité des États-Unis. Refuser les écritures si aucune sauvegarde fiable n'est trouvée ; restaurer et redémarrer complètement et tester Face ID et la dictée. N'allez jamais dans \"Paramètres → Siri\".";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面。它可能重新检查设备资格，使下载的资源失效。恢复后完整重启，只通过语音测试 Siri。" = "Après avoir restauré le modèle réel, n'ouvrez pas la page \"Paramètres → Siri\". Il peut revérifier l’éligibilité de l’appareil, invalidant ainsi les ressources téléchargées. Après la récupération, effectuez un redémarrage complet et testez Siri avec uniquement votre voix.";
+"千万不要打开「设置 → Siri」" = "N'ouvrez jamais \"Paramètres → Siri\"";
+"已恢复真实机型。请完整重启设备。进入 Siri 设置可能触发设备资格重新检查；只通过语音测试 Siri，并检查 Face ID 和听写。" = "Le modèle réel a été restauré. Veuillez redémarrer complètement l'appareil. L'accès aux paramètres Siri peut déclencher une nouvelle vérification de l'éligibilité de l'appareil ; testez Siri uniquement par la voix et vérifiez Face ID et la dictée.";
+"我记住了" = "je me souviens";
+
+/* Experimental full spoofing and general sales regions */
+"完整机型伪装" = "Camouflage complet du modèle";
+"选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。" = "Sélectionnez le modèle cible et la région de vente, et remplissez automatiquement le numéro de carte vérifié, le processeur et le modèle réglementaire. La combinaison inconnue rejette l'écriture.";
+"进入完整机型伪装" = "Entrez le camouflage complet du modèle";
+"极高风险：完整机型伪装" = "Risque extrêmement élevé : déguisement complet du modèle";
+"此功能同时修改产品、板号、CPU、监管型号和销售地区，可能导致 Face ID、听写、通信或启动异常。请先备份整机。" = "Cette fonction modifie simultanément le produit, le numéro de carte, le processeur, le modèle réglementaire et la région de vente, ce qui peut provoquer des anomalies de Face ID, de dictée, de communication ou de démarrage. Veuillez d'abord sauvegarder l'intégralité de la machine.";
+"我了解风险，进入机型伪装" = "Je comprends les risques et j'entre dans le camouflage du modèle";
+"仅对已核实的机型、板号、CPU 与监管型号组合写入。" = "Écrivez uniquement la combinaison vérifiée du modèle, du numéro de carte, du processeur et du modèle réglementaire.";
+"此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。" = "Cette fonctionnalité masquera complètement l'identité du modèle et peut affecter Face ID, la dictée, la communication et la stabilité du système. Le plist complet est sauvegardé avant l'écriture.";
+"目标机型" = "Modèle cible";
+"机型" = "Modèle";
+"销售地区代码，例如 LL / CH / JP" = "Indicatif de zone de vente, tel que LL/CH/JP";
+"无可靠映射，不可写入" = "Pas de cartographie fiable, non inscriptible";
+"写入实验性机型伪装" = "Écrire un camouflage de modèle expérimental";
+"完整机型伪装 · 实验性" = "Camouflage complet du modèle · Expérimental";
+"将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。" = "ProductType, numéro de carte, CPU, modèle réglementaire et région de vente seront réécrits en même temps. Peut provoquer des anomalies de Face ID, de dictée, de communication ou de démarrage. L'écriture n'est autorisée que si le modèle est connu ; enregistrez une sauvegarde complète avant de continuer.";
+"高风险：销售地区修改" = "Risque élevé : modification du territoire de vente";
+"将把当前销售地区改为 LL/A。已知机型可匹配美版监管型号；未知地区的监管型号会保留原值。修改设备身份可能影响系统功能；请先备份。" = "Changera la région de vente actuelle en LL/A. Les modèles connus peuvent correspondre au modèle réglementaire américain ; les modèles de régulation dans des régions inconnues conserveront leur valeur d’origine. La modification de l'identité de l'appareil peut affecter les fonctions du système ; veuillez d'abord sauvegarder.";
+"销售地区代码必须是 1–3 个英文字母" = "L'indicatif de la zone de vente doit être composé de 1 à 3 lettres anglaises";
+"目标机型与销售地区缺少可靠监管型号映射，未写入" = "Le modèle cible et la région de vente ne disposent pas d’une cartographie fiable du modèle réglementaire et n’ont pas été rédigés.";
+"当前真实机型未列入已核实硬件表，未写入" = "Le modèle réel actuel n'est pas répertorié dans le tableau du matériel vérifié et n'a pas été écrit.";
+"实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。" = "Le modèle expérimental, le numéro de carte, le processeur, le modèle réglementaire et la région de vente ont été rédigés et vérifiés ; veuillez redémarrer complètement.";
+"第二阶段已恢复真实机型并校验。请完整重启，测试 Face ID 与听写；千万不要打开「设置 → Siri」。" = "Dans un deuxième temps, le modèle réel a été restauré et vérifié. Veuillez redémarrer complètement pour tester Face ID et la dictée ; n'ouvrez pas \"Paramètres → Siri\".";

@@ -296,3 +296,49 @@
 "第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "2. stopnja je obnovila pravo identiteto. Napravo povsem znova zaženite in preverite Face ID, narekovanje in Siri AI.";
 "旧机型请使用两阶段流程" = "Za starejše naprave uporabite dvostopenjski postopek";
 "我确认资源已下载完成" = "Potrjujem, da je prenos virov končan";
+
+/* Strata-inspired experimental workflow and photo repair */
+"检测到扩图字段异常，点击修正" = "Zaznana je nepravilnost v polju razširitve slike. Kliknite, da ga popravite.";
+"只修正已存在的两个扩图能力字段；写入前保存完整备份并读回校验。" = "Popravljeni sta le dve obstoječi polji zmožnosti razširitve slike; pred pisanjem shranite celotno varnostno kopijo in preberite za preverjanje.";
+"修正扩图字段" = "Pravilno polje razširitve slike";
+"写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。" = "Pisanje v območje ZDA, SiriMode, zmogljivosti generativnega modela in tri reže CacheData. Kamuflaža modela ni obvezna; ko je vklopljen, se spremeni samo ProductType, kar lahko vpliva na Face ID in narekovanje. Samodejno varnostno kopiranje pred pisanjem; preskusni prenos vira po popolnem ponovnem zagonu.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID、听写与 Siri AI。" = "Uporablja se samo pri izbiri kamuflaže modela v prvi fazi. Obnovite pravi ProductType iz zgodovinske varnostne kopije iste naprave, pri čemer ohranite regijo ZDA in polja zmogljivosti. Zavrni pisanje, če ni najdena nobena zaupanja vredna varnostna kopija; dokončajte ponovni zagon po obnovitvi in ​​preizkusite Face ID, narekovanje in Siri AI.";
+"高风险：修正扩图字段" = "Visoko tveganje: popravite polja za razširitev slike";
+"仅当两个字段均存在且值异常时，写入 M1n2sAqf33NAOgZRGxQYBA=true 与 rb2tKZxIjOGm2tBmUQSLqQ=false。操作前自动备份，完成后需重启测试。" = "Zapišite M1n2sAqf33NAOgZRGxQYBA=true in rb2tKZxIjOGm2tBmUQSLqQ=false le, če sta obe polji prisotni in imata nenormalne vrednosti. Samodejno varnostno kopiranje pred delovanjem in ponovni zagon preskusa po zaključku.";
+"仅旧机型可使用此修正" = "Ta popravek je na voljo samo pri starejših modelih";
+"扩图字段已备份、修正并读回校验。请完整重启后测试照片功能。" = "Razširjena slikovna polja so bila varnostno kopirana, popravljena in prebrana za preverjanje. Preizkusite funkcijo fotografiranja po popolnem ponovnem zagonu.";
+"能力字段已写入并校验。请完整重启，检查资源下载与功能。" = "Polja zmogljivosti so bila zapisana in preverjena. Popolnoma znova zaženite in preverite prenose virov in funkcije.";
+
+/* Siri settings warning after restoring real model */
+"高风险：临时伪装机型" = "Visoko tveganje: začasni kamuflažni model";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面" = "Po obnovitvi pravega modela ne odpirajte strani »Nastavitve → Siri«.";
+"打开该页面可能重新检查设备资格，使已下载的 Siri AI 资源失效。请只通过语音测试，勿进入 Siri 设置。" = "Če odprete to stran, lahko znova preverite primernost naprave in razveljavite prenesene vire Siri AI. Preizkusite samo glasovni preizkus in ne vstopajte v nastavitve Siri.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。" = "Uporablja se samo pri izbiri kamuflaže modela v prvi fazi. Obnovite pravi ProductType iz zgodovinske varnostne kopije iste naprave, pri čemer ohranite regijo ZDA in polja zmogljivosti. Zavrni pisanje, če ni najdena nobena zaupanja vredna varnostna kopija; obnovite in popolnoma znova zaženite ter preizkusite Face ID in narekovanje. Nikoli ne pojdite v \"Nastavitve → Siri\".";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面。它可能重新检查设备资格，使下载的资源失效。恢复后完整重启，只通过语音测试 Siri。" = "Po obnovitvi pravega modela ne odpirajte strani »Nastavitve → Siri«. Lahko znova preveri ustreznost naprave in razveljavi prenesene vire. Po obnovitvi izvedite popoln ponovni zagon in preizkusite Siri samo z glasom.";
+"千万不要打开「设置 → Siri」" = "Nikoli ne odprite \"Nastavitve → Siri\"";
+"已恢复真实机型。请完整重启设备。进入 Siri 设置可能触发设备资格重新检查；只通过语音测试 Siri，并检查 Face ID 和听写。" = "Pravi model je obnovljen. Popolnoma znova zaženite napravo. Vstop v nastavitve Siri lahko sproži ponovno preverjanje primernosti naprave; preizkusite Siri samo z glasom in preverite Face ID in narekovanje.";
+"我记住了" = "spomnim se";
+
+/* Experimental full spoofing and general sales regions */
+"完整机型伪装" = "Popolna kamuflaža modela";
+"选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。" = "Izberite ciljni model in prodajno regijo ter samodejno izpolnite preverjeno številko plošče, CPU in regulativni model. Neznana kombinacija zavrne pisanje.";
+"进入完整机型伪装" = "Vnesite popolno kamuflažo modela";
+"极高风险：完整机型伪装" = "Izjemno visoko tveganje: popolna preobleka modela";
+"此功能同时修改产品、板号、CPU、监管型号和销售地区，可能导致 Face ID、听写、通信或启动异常。请先备份整机。" = "Ta funkcija istočasno spremeni izdelek, številko plošče, CPE, regulativni model in prodajno regijo, kar lahko povzroči Face ID, narekovanje, komunikacijo ali nepravilnosti pri zagonu. Najprej varnostno kopirajte celoten stroj.";
+"我了解风险，进入机型伪装" = "Razumem tveganja in vstopam v kamuflažo modela";
+"仅对已核实的机型、板号、CPU 与监管型号组合写入。" = "Napišite samo preverjeno kombinacijo modela, številke plošče, procesorja in regulativnega modela.";
+"此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。" = "Ta funkcija bo popolnoma prikrila identiteto modela in lahko vpliva na Face ID, narekovanje, komunikacijo in stabilnost sistema. Pred pisanjem se varnostno kopira celoten plist.";
+"目标机型" = "Ciljni model";
+"机型" = "model";
+"销售地区代码，例如 LL / CH / JP" = "Koda prodajnega območja, kot je LL/CH/JP";
+"无可靠映射，不可写入" = "Ni zanesljivega preslikave, ni zapisljivo";
+"写入实验性机型伪装" = "Napiši poskusni model kamuflaže";
+"完整机型伪装 · 实验性" = "Popolna kamuflaža modela · Eksperimentalno";
+"将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。" = "Vrsta izdelka, številka plošče, CPU, regulativni model in prodajna regija bodo prepisani istočasno. Lahko povzroči Face ID, narekovanje, komunikacijo ali nepravilnosti pri zagonu. Pisanje je dovoljeno le, če je model znan; pred nadaljevanjem shranite celotno varnostno kopijo. (ProductType)";
+"高风险：销售地区修改" = "Visoko tveganje: sprememba prodajnega območja";
+"将把当前销售地区改为 LL/A。已知机型可匹配美版监管型号；未知地区的监管型号会保留原值。修改设备身份可能影响系统功能；请先备份。" = "Bo spremenil trenutno prodajno regijo v LL/A. Znani modeli se lahko ujemajo z regulativnim modelom ZDA; regulatorni modeli v neznanih regijah bodo ohranili prvotno vrednost. Spreminjanje identitete naprave lahko vpliva na sistemske funkcije; najprej varnostno kopirajte.";
+"销售地区代码必须是 1–3 个英文字母" = "Koda prodajnega območja mora biti sestavljena iz 1–3 angleških črk";
+"目标机型与销售地区缺少可靠监管型号映射，未写入" = "Ciljni model in prodajna regija nimata zanesljive preslikave regulativnega modela in nista bila zapisana.";
+"当前真实机型未列入已核实硬件表，未写入" = "Trenutni pravi model ni naveden v tabeli preverjene strojne opreme in ni bil napisan.";
+"实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。" = "Eksperimentalni model, številka plošče, CPE, regulativni model in prodajna regija so bili napisani in preverjeni; prosim popolnoma znova zaženite.";
+"第二阶段已恢复真实机型并校验。请完整重启，测试 Face ID 与听写；千万不要打开「设置 → Siri」。" = "V drugi fazi je bil restavriran in verificiran pravi model. Popolnoma znova zaženite, da preizkusite Face ID in narekovanje; ne odpirajte \"Nastavitve → Siri\".";

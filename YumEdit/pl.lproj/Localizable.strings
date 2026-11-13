@@ -296,3 +296,49 @@
 "第二阶段已恢复真实身份。请完整重启并测试 Face ID、听写和 Siri AI。" = "Etap 2 przywrócił prawdziwą tożsamość. Uruchom ponownie i sprawdź Face ID, dyktowanie oraz Siri AI.";
 "旧机型请使用两阶段流程" = "Dla starszych urządzeń użyj procesu dwuetapowego";
 "我确认资源已下载完成" = "Potwierdzam zakończenie pobierania zasobów";
+
+/* Strata-inspired experimental workflow and photo repair */
+"检测到扩图字段异常，点击修正" = "Wykryto nieprawidłowość w polu rozszerzania obrazu. Kliknij, aby to poprawić.";
+"只修正已存在的两个扩图能力字段；写入前保存完整备份并读回校验。" = "Poprawiane są tylko dwa istniejące pola możliwości rozszerzania obrazu; zapisz pełną kopię zapasową przed zapisaniem i przeczytaj ponownie w celu weryfikacji.";
+"修正扩图字段" = "Popraw pole rozwinięcia obrazu";
+"写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。" = "Zapis na obszarze USA, tryb SiriMode, możliwości modelu generatywnego i trzy gniazda CacheData. Kamuflaż modelu jest opcjonalny; po włączeniu modyfikowany jest tylko typ produktu, co może mieć wpływ na funkcję Face ID i dyktowanie. Automatyczna kopia zapasowa przed zapisem; przetestuj pobieranie zasobów po całkowitym ponownym uruchomieniu. (ProductType)";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID、听写与 Siri AI。" = "Używane tylko przy wyborze kamuflażu modelu w pierwszym etapie. Przywróć prawdziwy ProductType z historycznej kopii zapasowej tego samego urządzenia, zachowując region USA i pola możliwości. Odmów zapisu, jeśli nie zostanie znaleziona zaufana kopia zapasowa; wykonaj pełne ponowne uruchomienie po odzyskaniu i przetestuj Face ID, dyktowanie i Siri AI.";
+"高风险：修正扩图字段" = "Wysokie ryzyko: napraw pola rozwijania obrazu";
+"仅当两个字段均存在且值异常时，写入 M1n2sAqf33NAOgZRGxQYBA=true 与 rb2tKZxIjOGm2tBmUQSLqQ=false。操作前自动备份，完成后需重启测试。" = "Zapisz M1n2sAqf33NAOgZRGxQYBA=true i rb2tKZxIjOGm2tBmUQSLqQ=false tylko wtedy, gdy oba pola są obecne i mają nieprawidłowe wartości. Automatycznie wykonaj kopię zapasową przed operacją i uruchom ponownie test po jego zakończeniu.";
+"仅旧机型可使用此修正" = "Ta poprawka jest dostępna tylko w starszych modelach";
+"扩图字段已备份、修正并读回校验。请完整重启后测试照片功能。" = "Kopie zapasowe rozszerzonych pól obrazu zostały utworzone, poprawione i ponownie odczytane w celu weryfikacji. Proszę przetestować funkcję foto po całkowitym ponownym uruchomieniu.";
+"能力字段已写入并校验。请完整重启，检查资源下载与功能。" = "Pola możliwości zostały zapisane i zweryfikowane. Uruchom ponownie całkowicie i sprawdź pobieranie zasobów oraz funkcje.";
+
+/* Siri settings warning after restoring real model */
+"高风险：临时伪装机型" = "Wysokie ryzyko: tymczasowy model kamuflażu";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面" = "Po przywróceniu prawdziwego modelu nie otwieraj strony „Ustawienia → Siri”.";
+"打开该页面可能重新检查设备资格，使已下载的 Siri AI 资源失效。请只通过语音测试，勿进入 Siri 设置。" = "Otwarcie tej strony może ponownie sprawdzić, czy urządzenie spełnia kryteria, unieważniając pobrane zasoby Siri AI. Proszę jedynie przejść test głosowy i nie wchodzić w ustawienia Siri.";
+"仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。" = "Używane tylko przy wyborze kamuflażu modelu w pierwszym etapie. Przywróć prawdziwy ProductType z historycznej kopii zapasowej tego samego urządzenia, zachowując region USA i pola możliwości. Odmów zapisuje, jeśli nie zostanie znaleziona zaufana kopia zapasowa; przywróć i całkowicie uruchom ponownie oraz przetestuj Face ID i dyktowanie. Nigdy nie wchodź do „Ustawienia → Siri”.";
+"恢复真实机型后，千万不要打开「设置 → Siri」页面。它可能重新检查设备资格，使下载的资源失效。恢复后完整重启，只通过语音测试 Siri。" = "Po przywróceniu prawdziwego modelu nie otwieraj strony „Ustawienia → Siri”. Może ponownie sprawdzić kwalifikowalność urządzenia, unieważniając pobrane zasoby. Po odzyskaniu wykonaj pełny restart i przetestuj Siri za pomocą samego głosu.";
+"千万不要打开「设置 → Siri」" = "Nigdy nie otwieraj „Ustawienia → Siri”";
+"已恢复真实机型。请完整重启设备。进入 Siri 设置可能触发设备资格重新检查；只通过语音测试 Siri，并检查 Face ID 和听写。" = "Prawdziwy model został przywrócony. Proszę całkowicie zrestartować urządzenie. Wejście do ustawień Siri może spowodować ponowne sprawdzenie kwalifikowalności urządzenia; przetestuj Siri tylko za pomocą głosu i sprawdź Face ID oraz dyktowanie.";
+"我记住了" = "pamiętam";
+
+/* Experimental full spoofing and general sales regions */
+"完整机型伪装" = "Kompletny kamuflaż modelu";
+"选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。" = "Wybierz docelowy model i region sprzedaży, a następnie automatycznie uzupełnij zweryfikowany numer płyty głównej, procesor i model zgodny z przepisami. Nieznana kombinacja odrzuca zapis.";
+"进入完整机型伪装" = "Wprowadź pełny kamuflaż modelu";
+"极高风险：完整机型伪装" = "Niezwykle wysokie ryzyko: kompletne przebranie modelu";
+"此功能同时修改产品、板号、CPU、监管型号和销售地区，可能导致 Face ID、听写、通信或启动异常。请先备份整机。" = "Ta funkcja jednocześnie modyfikuje produkt, numer płyty głównej, procesor, model zgodny z przepisami i region sprzedaży, co może powodować nieprawidłowości w zakresie funkcji Face ID, dyktowania, komunikacji lub uruchamiania. Najpierw wykonaj kopię zapasową całego komputera.";
+"我了解风险，进入机型伪装" = "Rozumiem ryzyko i przystępuję do kamuflażu modelowego";
+"仅对已核实的机型、板号、CPU 与监管型号组合写入。" = "Zapisuj tylko zweryfikowaną kombinację modelu, numeru płyty, procesora i modelu zgodnego z przepisami.";
+"此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。" = "Ta funkcja całkowicie ukryje tożsamość modelu i może mieć wpływ na funkcję Face ID, dyktowanie, komunikację i stabilność systemu. Przed zapisaniem tworzona jest kopia zapasowa całej listy plist.";
+"目标机型" = "Model docelowy";
+"机型" = "model";
+"销售地区代码，例如 LL / CH / JP" = "Numer kierunkowy sprzedaży, taki jak LL/CH/JP";
+"无可靠映射，不可写入" = "Brak niezawodnego mapowania, brak możliwości zapisu";
+"写入实验性机型伪装" = "Napisz eksperymentalny model kamuflażu";
+"完整机型伪装 · 实验性" = "Kompletny kamuflaż modelu · Eksperymentalny";
+"将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。" = "Typ produktu, numer płyty głównej, procesor, model regulacyjny i region sprzedaży zostaną przepisane w tym samym czasie. Może powodować nieprawidłowości w zakresie rozpoznawania twarzy, dyktowania, komunikacji lub uruchamiania. Pisanie jest dozwolone tylko wtedy, gdy znany jest model; przed kontynuowaniem zapisz pełną kopię zapasową. (ProductType)";
+"高风险：销售地区修改" = "Wysokie ryzyko: modyfikacja terytorium sprzedaży";
+"将把当前销售地区改为 LL/A。已知机型可匹配美版监管型号；未知地区的监管型号会保留原值。修改设备身份可能影响系统功能；请先备份。" = "Zmieni bieżący region sprzedaży na LL/A. Znane modele mogą odpowiadać modelowi regulacyjnemu USA; modele regulacyjne w nieznanych regionach zachowają pierwotną wartość. Modyfikowanie tożsamości urządzenia może mieć wpływ na funkcje systemu; najpierw wykonaj kopię zapasową.";
+"销售地区代码必须是 1–3 个英文字母" = "Numer kierunkowy sprzedaży musi składać się z 1–3 liter angielskich";
+"目标机型与销售地区缺少可靠监管型号映射，未写入" = "Model docelowy i region sprzedaży nie mają wiarygodnego mapowania modelu regulacyjnego i nie zostały napisane.";
+"当前真实机型未列入已核实硬件表，未写入" = "Aktualny rzeczywisty model nie jest wymieniony w zweryfikowanej tabeli sprzętu i nie został zapisany.";
+"实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。" = "Napisano i zweryfikowano model eksperymentalny, numer płyty, procesor, model regulacyjny i region sprzedaży; całkowicie uruchom ponownie.";
+"第二阶段已恢复真实机型并校验。请完整重启，测试 Face ID 与听写；千万不要打开「设置 → Siri」。" = "W drugim etapie odtworzono i zweryfikowano model rzeczywisty. Uruchom ponownie całkowicie, aby przetestować funkcję Face ID i dyktando; nie otwieraj „Ustawienia → Siri”.";
