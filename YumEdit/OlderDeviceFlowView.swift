@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OlderDeviceFlowView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("overwriteUSRegion") private var overwriteUSRegion = true
     @State private var selectedProduct = ""
     @State private var spoofEnabled = false
     @State private var confirmedDownloaded = false
@@ -19,13 +20,19 @@ struct OlderDeviceFlowView: View {
                 Section {
                     if let snapshot {
                         Text(YumLocalization.text(snapshot.isSpoofed
-                            ? "当前仍是临时伪装机型" : "当前已是真实机型"))
+                            ? snapshot.identityWarning : "当前已是真实机型"))
                             .foregroundStyle(snapshot.isSpoofed ? .orange : .green)
                         Text("\(DeviceNames.labeled(snapshot.physicalModel)) → \(DeviceNames.labeled(snapshot.cachedModel))")
                             .font(.system(.footnote, design: .monospaced))
                     }
                     Text(YumLocalization.text(status))
                         .font(.footnote).foregroundStyle(.secondary)
+                    Label(
+                        YumLocalization.text(overwriteUSRegion ? "主页策略：覆写为美版" : "主页策略：保持原销售地区"),
+                        systemImage: overwriteUSRegion ? "globe.americas.fill" : "location.fill"
+                    )
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(overwriteUSRegion ? .blue : .green)
                 }
                 if snapshot?.photoRepairNeeded == true {
                     Section("检测到扩图字段异常，点击修正") {
@@ -56,7 +63,9 @@ struct OlderDeviceFlowView: View {
                         }
                         .onChange(of: selectedProduct) { _, _ in TapSound.play(.confirm) }
                     }
-                    Text("写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。")
+                    Text(YumLocalization.text(overwriteUSRegion
+                        ? "写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。临时伪装时同步匹配美版监管型号。写入前自动备份；完整重启后测试资源下载。"
+                        : "保持原行货销售地区不变，只写入 SiriMode、生成式模型能力与三处 CacheData 槽位。临时伪装时按原地区匹配监管型号。写入前自动备份；完整重启后测试资源下载。"))
                         .font(.footnote).foregroundStyle(.secondary)
                     Button("第一阶段：临时伪装并下载资源", role: .destructive) {
                         TapSound.play(.warning)
@@ -65,7 +74,9 @@ struct OlderDeviceFlowView: View {
                     .disabled(busy || snapshot == nil || snapshot?.isSpoofed == true || (snapshot?.olderAIReady == true && !spoofEnabled))
                 }
                 Section("第二阶段：恢复真实机型") {
-                    Text("仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实 ProductType，保留美区与能力字段。找不到可信备份就拒绝写入；恢复后完整重启并测试 Face ID 与听写。千万不要进入「设置 → Siri」。")
+                    Text(YumLocalization.text(overwriteUSRegion
+                        ? "仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实机型，并匹配美版监管型号；保留美区与能力字段。找不到可信备份就拒绝写入。千万不要进入「设置 → Siri」。"
+                        : "仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实机型与原行货监管型号；销售地区与能力字段保持不变。找不到可信备份就拒绝写入。千万不要进入「设置 → Siri」。"))
                         .font(.footnote).foregroundStyle(.secondary)
                     Toggle("我确认资源已下载完成", isOn: $confirmedDownloaded)
                         .onChange(of: confirmedDownloaded) { _, _ in TapSound.play(.confirm) }
@@ -76,7 +87,7 @@ struct OlderDeviceFlowView: View {
                     .disabled(busy || snapshot?.isSpoofed != true || !confirmedDownloaded)
                 }
             }
-            .navigationTitle(YumLocalization.text("旧机型两阶段") + " · " + YumLocalization.text("实验性选项"))
+            .navigationTitle(YumLocalization.text("两步一键开启苹果智能"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("完成") { TapSound.play(); dismiss() }
@@ -90,7 +101,9 @@ struct OlderDeviceFlowView: View {
         .fullScreenCover(isPresented: $showFirstRisk) {
             RiskScreen(
                 title: "高风险：临时伪装机型",
-                detail: "写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。机型伪装可选；开启时仅修改 ProductType，可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。",
+                detail: overwriteUSRegion
+                    ? "写入美区与能力字段；临时伪装时同步匹配美版监管型号。可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。"
+                    : "保持原行货销售地区不变，写入能力字段；临时伪装时按原地区匹配监管型号。可能影响 Face ID 和听写。写入前自动备份；完整重启后测试资源下载。",
                 action: "我了解风险，继续写入"
             ) {
                 showFirstRisk = false
@@ -146,8 +159,11 @@ struct OlderDeviceFlowView: View {
         busy = true
         let product = selectedProduct
         let shouldSpoof = spoofEnabled
+        let shouldOverwriteUSRegion = overwriteUSRegion
         Task.detached {
-            let result = RegionWriter.beginOlderDownloadStage(profileProduct: shouldSpoof ? product : nil)
+            let result = RegionWriter.beginOlderDownloadStage(
+                profileProduct: shouldSpoof ? product : nil,
+                overwriteUSRegion: shouldOverwriteUSRegion)
             await MainActor.run {
                 busy = false
                 status = result.1
@@ -159,8 +175,9 @@ struct OlderDeviceFlowView: View {
 
     private func runSecond() {
         busy = true
+        let shouldOverwriteUSRegion = overwriteUSRegion
         Task.detached {
-            let result = RegionWriter.finishOlderDownloadStage()
+            let result = RegionWriter.finishOlderDownloadStage(overwriteUSRegion: shouldOverwriteUSRegion)
             await MainActor.run {
                 busy = false
                 status = result.1

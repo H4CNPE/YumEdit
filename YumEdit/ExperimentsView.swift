@@ -32,7 +32,7 @@ struct ExperimentsView: View {
                         .disabled(busy)
                 }
             }
-            .navigationTitle("实验性选项")
+            .navigationTitle("高级选项")
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("完成") { TapSound.play(); dismiss() } } }
         }
         .fullScreenCover(isPresented: $showSpoofRisk) {
