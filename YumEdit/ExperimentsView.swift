@@ -25,6 +25,7 @@ struct ExperimentsView: View {
                     }
                     .disabled(busy)
                 }
+                OriginalIdentityView()
                 Section("外接屏扩展实验") {
                     Text("分阶段测试 iPad 多任务能力和设备类别。可能损坏音频、通话或相机视频；扩展桌面尚未得到验证。")
                         .font(.footnote).foregroundStyle(.secondary)

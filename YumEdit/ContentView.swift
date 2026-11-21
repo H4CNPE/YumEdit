@@ -637,9 +637,10 @@ nonisolated enum RegionWriter {
             return (false, "当前真实机型未列入已核实硬件表，未写入")
         }
         let outcome = mutateRoot { root in
+            let baseline = matchingOriginalIdentity(current: root)
             guard var extra = root["CacheExtra"] as? [String: Any],
-                  extra[boardKey] as? String == realBoard,
-                  extra[cpuKey] as? String == realCPU else { throw SalesError.unknownSpoof }
+                  sameHardwareID(extra[boardKey], baseline?[boardKey] as? String ?? realBoard),
+                  sameHardwareID(extra[cpuKey], baseline?[cpuKey] as? String ?? realCPU) else { throw SalesError.unknownSpoof }
             guard let cachedProduct = extra[productKey] as? String,
                   let currentRegulatory = extra[regulatory] as? String else { throw SalesError.unknownSpoof }
             if cachedProduct != machine {
@@ -685,6 +686,11 @@ nonisolated enum RegionWriter {
     private static let productKey = "h9jDsbgj7xIVeIQ8S3/X3Q"
     private static let boardKey = "oYicEKzVTz4/CxxE05pEgQ"
     private static let cpuKey = "5pYKlGnYYBzGvAlIU8RjEQ"
+    // Compare hardware identifiers without altering the strings stored in the cache.
+    private static func sameHardwareID(_ cached: Any?, _ expected: String?) -> Bool {
+        guard let cached = cached as? String, let expected else { return false }
+        return cached.caseInsensitiveCompare(expected) == .orderedSame
+    }
     private static let siriModeKey = "a3n5T9sFtlyQ74NEp9ESxg"
     private static let generativeKey = "A62OafQ85EJAiiqKn4agtg"
     // Physical model identifiers and exact regulatory models from Apple's iPhone model list.
@@ -785,8 +791,9 @@ nonisolated enum RegionWriter {
             guard let extra = root["CacheExtra"] as? [String: Any] else { throw WriteError.verify }
             let physical = deviceIdentifier()
             let cached = extra[productKey] as? String ?? "—"
-            let expectedBoard = physicalBoards[physical]
-            let expectedCPU = physicalCPU(for: physical)
+            let baseline = matchingOriginalIdentity(current: root)
+            let expectedBoard = baseline?[boardKey] as? String ?? physicalBoards[physical]
+            let expectedCPU = baseline?[cpuKey] as? String ?? physicalCPU(for: physical)
             let countryValue = extra[country] as? String ?? "—"
             let regionValue = extra[region] as? String ?? "—"
             let regulatoryValue = extra[regulatory] as? String ?? "—"
@@ -795,7 +802,7 @@ nonisolated enum RegionWriter {
             var hardwareDifferences: [DeviceSnapshot.HardwareDifference] = []
             for (field, key, expected) in [("主板型号", boardKey, expectedBoard), ("芯片型号", cpuKey, expectedCPU)] {
                 let value = extra[key] as? String
-                if let expected, value != expected {
+                if let expected, !sameHardwareID(value, expected) {
                     hardwareDifferences.append(.init(field: field, cached: value ?? "—", expected: expected))
                 }
             }
@@ -883,6 +890,128 @@ nonisolated enum RegionWriter {
     private static var backupDirectory: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("GestaltBackups", isDirectory: true)
+    }
+
+    struct OriginalIdentitySettings: Sendable {
+        let product: String
+        let board: String
+        let cpu: String
+        let regulatory: String
+        let country: String
+        let source: String
+    }
+
+    private static var originalIdentityURL: URL {
+        backupDirectory.appendingPathComponent("OriginalIdentity-\(deviceIdentifier()).plist")
+    }
+
+    private static func originalIdentityFields(_ root: [String: Any]) -> OriginalIdentitySettings? {
+        guard let extra = root["CacheExtra"] as? [String: Any],
+              let product = extra[productKey] as? String,
+              let board = extra[boardKey] as? String,
+              let cpu = extra[cpuKey] as? String,
+              let regulatory = extra[regulatory] as? String,
+              let country = extra[country] as? String,
+              let area = extra[region] as? String,
+              product == deviceIdentifier(), !board.isEmpty, !cpu.isEmpty,
+              regulatory.range(of: "^A[0-9]{4}$", options: .regularExpression) != nil,
+              country.range(of: "^[A-Z]{1,3}$", options: .regularExpression) != nil,
+              area == "\(country)/A" else { return nil }
+        return .init(product: product, board: board, cpu: cpu,
+                     regulatory: regulatory, country: country,
+                     source: root["YumEditIdentitySource"] as? String ?? "导入文件")
+    }
+
+    private static func storedOriginalIdentity() -> [String: Any]? {
+        guard let data = try? Data(contentsOf: originalIdentityURL),
+              let root = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+              originalIdentityFields(root) != nil else { return nil }
+        return root
+    }
+
+    static func originalIdentitySettings() -> OriginalIdentitySettings? {
+        storedOriginalIdentity().flatMap(originalIdentityFields)
+    }
+
+    static var physicalIdentifier: String { deviceIdentifier() }
+
+    static func clearOriginalIdentity() throws {
+        if FileManager.default.fileExists(atPath: originalIdentityURL.path) {
+            try FileManager.default.removeItem(at: originalIdentityURL)
+        }
+    }
+
+    private static func matchingOriginalIdentity(current: [String: Any]) -> [String: Any]? {
+        guard let stored = storedOriginalIdentity(),
+              let currentUUID = current["CacheUUID"] as? String,
+              let storedUUID = stored["CacheUUID"] as? String,
+              currentUUID == storedUUID,
+              let currentData = current["CacheData"] as? Data,
+              let storedData = stored["CacheData"] as? Data,
+              (storedData == currentData || (try? patchOlderAIBits(storedData)) == currentData)
+        else { return nil }
+        return stored["CacheExtra"] as? [String: Any]
+    }
+
+    private static func expectedOriginalHardware(current: [String: Any], machine: String) -> (String?, String?) {
+        let baseline = matchingOriginalIdentity(current: current)
+        return (baseline?[boardKey] as? String ?? physicalBoards[machine],
+                baseline?[cpuKey] as? String ?? physicalCPU(for: machine))
+    }
+
+    private static func acceptedOriginalRegulatory(_ value: String, machine: String,
+                                                   current: [String: Any]) -> Bool {
+        knownRealRegulatory(value, for: machine) ||
+            (matchingOriginalIdentity(current: current)?[regulatory] as? String == value)
+    }
+
+    static func importOriginalIdentity(from source: URL) throws -> String {
+        let data = try Data(contentsOf: source)
+        guard let root = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+              let fields = originalIdentityFields(root),
+              root["CacheUUID"] is String, root["CacheData"] is Data else {
+            throw NSError(domain: "YumEdit.OriginalIdentity", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "请选择同一设备的完整原版 MobileGestalt plist；机型、硬件字段或缓存数据无效。"])
+        }
+        var stored = root
+        stored["YumEditIdentitySource"] = "导入文件"
+        try FileManager.default.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+        let encoded = try PropertyListSerialization.data(fromPropertyList: stored, format: .binary, options: 0)
+        try encoded.write(to: originalIdentityURL, options: .atomic)
+        let handle = try accessHandle()
+        defer { worse_query_release(handle) }
+        let current = try readRoot()
+        let match = matchingOriginalIdentity(current: current) != nil
+        return "已导入 \(fields.product) 的原版身份。\(match ? "与当前缓存指纹匹配，可参与恢复校验。" : "与当前缓存指纹不匹配，仅保存用于核对，暂不参与恢复写入。")"
+    }
+
+    static func saveOriginalIdentity(product: String, board: String, cpu: String,
+                                     regulatoryModel: String, countryCode: String) throws -> String {
+        let handle = try accessHandle()
+        defer { worse_query_release(handle) }
+        let currentRoot = try readRoot()
+        var root = storedOriginalIdentity() ?? currentRoot
+        guard var extra = root["CacheExtra"] as? [String: Any],
+              root["CacheUUID"] is String, root["CacheData"] is Data else { throw WriteError.verify }
+        let code = countryCode.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        extra[productKey] = product.trimmingCharacters(in: .whitespacesAndNewlines)
+        extra[boardKey] = board.trimmingCharacters(in: .whitespacesAndNewlines)
+        extra[cpuKey] = cpu.trimmingCharacters(in: .whitespacesAndNewlines)
+        extra[regulatory] = regulatoryModel.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        extra[country] = code
+        extra[region] = "\(code)/A"
+        root["CacheExtra"] = extra
+        root["YumEditIdentitySource"] = "手动设置"
+        guard originalIdentityFields(root) != nil else {
+            throw NSError(domain: "YumEdit.OriginalIdentity", code: 2,
+                          userInfo: [NSLocalizedDescriptionKey: "原版机型必须与物理设备一致，并填写有效的主板、芯片、监管型号和销售地区。"])
+        }
+        try FileManager.default.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+        let data = try PropertyListSerialization.data(fromPropertyList: root, format: .binary, options: 0)
+        try data.write(to: originalIdentityURL, options: .atomic)
+        let matched = matchingOriginalIdentity(current: currentRoot) != nil
+        return "原版身份校验基准已保存。手动值由用户提供，YumEdit 无法独立证明其真实性。" +
+            (matched ? "当前缓存指纹匹配。" : "当前缓存指纹不匹配，暂不参与恢复写入。")
     }
 
     struct BackupChoice: Sendable {
@@ -1314,19 +1443,37 @@ nonisolated enum RegionWriter {
     private static func historicalIdentity(
         current: [String: Any], machine: String, selectedSource: SalesSource?
     ) throws -> ([String: Any], SalesSource, String) {
+        let expectedHardware = expectedOriginalHardware(current: current, machine: machine)
         guard let cacheData = current["CacheData"] as? Data,
               let currentUUID = current["CacheUUID"] as? String,
-              let expectedBoard = physicalBoards[machine],
-              let expectedCPU = physicalCPU(for: machine) else { throw SalesError.noOriginalBackup }
+              let expectedBoard = expectedHardware.0,
+              let expectedCPU = expectedHardware.1 else { throw SalesError.noOriginalBackup }
         let currentExtra = current["CacheExtra"] as? [String: Any] ?? [:]
+        let suppliedOriginal = matchingOriginalIdentity(current: current)
         let profiles = machine.hasPrefix("iPad") ? padSpoofProfiles : spoofProfiles
         guard profiles.contains(where: {
-            ($0.product == currentExtra[productKey] as? String ||
-             machine == currentExtra[productKey] as? String) &&
-            $0.board == currentExtra[boardKey] as? String &&
-            $0.cpu == currentExtra[cpuKey] as? String &&
-            $0.regulatory == currentExtra[regulatory] as? String
+            guard $0.product == currentExtra[productKey] as? String,
+                  let currentCountry = currentExtra[country] as? String,
+                  let mapped = experimentalRegulatory($0, countryCode: currentCountry),
+                  let cachedRegulatory = currentExtra[regulatory] as? String else { return false }
+            let fullSpoof = sameHardwareID(currentExtra[boardKey], $0.board) &&
+                sameHardwareID(currentExtra[cpuKey], $0.cpu)
+            let productOnly = sameHardwareID(currentExtra[boardKey], expectedBoard) &&
+                sameHardwareID(currentExtra[cpuKey], expectedCPU)
+            let retainedOriginalRegulatory = suppliedOriginal?[regulatory] as? String == cachedRegulatory
+            return (fullSpoof || productOnly) &&
+                (cachedRegulatory == mapped || (productOnly && retainedOriginalRegulatory))
         }) else { throw SalesError.unknownSpoof }
+        if let original = suppliedOriginal,
+           original[productKey] as? String == machine,
+           sameHardwareID(original[boardKey], expectedBoard),
+           sameHardwareID(original[cpuKey], expectedCPU) {
+            for source in selectedSource.map({ [$0] }) ?? [.china, .europe] {
+                if let us = try? validatedUSModel(machine: machine, source: source, extra: original) {
+                    return (original, source, us)
+                }
+            }
+        }
         guard FileManager.default.fileExists(atPath: backupDirectory.path) else { throw SalesError.noOriginalBackup }
         let files = try FileManager.default.contentsOfDirectory(
             at: backupDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)
@@ -1343,8 +1490,8 @@ nonisolated enum RegionWriter {
                   backup["CacheUUID"] as? String == currentUUID,
                   let original = backup["CacheExtra"] as? [String: Any],
                   original[productKey] as? String == machine,
-                  original[boardKey] as? String == expectedBoard,
-                  original[cpuKey] as? String == expectedCPU else { continue }
+                  sameHardwareID(original[boardKey], expectedBoard),
+                  sameHardwareID(original[cpuKey], expectedCPU) else { continue }
             let candidates: [SalesSource] = selectedSource.map { [$0] } ?? [.china, .europe]
             for source in candidates {
                 guard let us = try? validatedUSModel(machine: machine, source: source, extra: original) else { continue }
@@ -1416,18 +1563,19 @@ nonisolated enum RegionWriter {
         let profile = profileProduct.flatMap { selected in profiles.first(where: { $0.product == selected }) }
         if profileProduct != nil && profile == nil { return (false, "未知临时伪装机型，未写入") }
         let result = mutateRoot { root in
+            let expectedHardware = expectedOriginalHardware(current: root, machine: machine)
             guard var extra = root["CacheExtra"] as? [String: Any],
                   let cacheData = root["CacheData"] as? Data,
                   extra[productKey] as? String == machine,
-                  extra[boardKey] as? String == physicalBoards[machine],
-                  extra[cpuKey] as? String == physicalCPU(for: machine) else {
+                  sameHardwareID(extra[boardKey], expectedHardware.0),
+                  sameHardwareID(extra[cpuKey], expectedHardware.1) else {
                 throw SalesError.unknownSpoof
             }
             guard let oldCountry = extra[country] as? String,
                   let oldRegion = extra[region] as? String,
                   let oldRegulatory = extra[regulatory] as? String,
                   !oldCountry.isEmpty, oldRegion == "\(oldCountry)/A",
-                  knownRealRegulatory(oldRegulatory, for: machine) else { throw SalesError.invalidSalesModel }
+                  acceptedOriginalRegulatory(oldRegulatory, machine: machine, current: root) else { throw SalesError.invalidSalesModel }
             let targetCountry = overwriteUSRegion ? "LL" : oldCountry
             let targetRegion = overwriteUSRegion ? "LL/A" : oldRegion
             let targetRegulatory: String
@@ -1483,25 +1631,25 @@ nonisolated enum RegionWriter {
                   currentRegion == "\(currentCountry)/A" else {
                 throw SalesError.alreadyReal
             }
+            let expectedHardware = expectedOriginalHardware(current: root, machine: machine)
             guard let currentData = root["CacheData"] as? Data,
                   let currentUUID = root["CacheUUID"] as? String,
-                  let expectedBoard = physicalBoards[machine],
-                  let expectedCPU = physicalCPU(for: machine),
+                  let expectedBoard = expectedHardware.0,
+                  let expectedCPU = expectedHardware.1,
                   let profile = (machine.hasPrefix("iPad") ? padSpoofProfiles : spoofProfiles)
                     .first(where: { $0.product == cachedProduct }),
                   let expectedSpoofRegulatory = experimentalRegulatory(profile, countryCode: currentCountry),
                   extra[regulatory] as? String == expectedSpoofRegulatory else {
                 throw SalesError.unknownSpoof
             }
-            guard FileManager.default.fileExists(atPath: backupDirectory.path) else { throw SalesError.noOriginalBackup }
-            let files = try FileManager.default.contentsOfDirectory(
-                at: backupDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)
+            let files = (try? FileManager.default.contentsOfDirectory(
+                at: backupDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles))?
                 .filter { $0.lastPathComponent.hasPrefix("MobileGestalt-") && $0.pathExtension == "plist" }
                 .sorted {
                     let a = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
                     let b = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
                     return a > b
-                }
+                } ?? []
             var found: [String: Any]?
             for file in files {
                 guard let bytes = try? Data(contentsOf: file),
@@ -1511,27 +1659,41 @@ nonisolated enum RegionWriter {
                       (originalData == currentData || (try? patchOlderAIBits(originalData)) == currentData),
                       let original = backup["CacheExtra"] as? [String: Any],
                       original[productKey] as? String == machine,
-                      original[boardKey] as? String == expectedBoard,
-                      original[cpuKey] as? String == expectedCPU,
+                      sameHardwareID(original[boardKey], expectedBoard),
+                      sameHardwareID(original[cpuKey], expectedCPU),
                       let originalCountry = original[country] as? String,
                       let originalRegion = original[region] as? String,
                       let originalRegulatory = original[regulatory] as? String,
                       originalRegion == "\(originalCountry)/A",
-                      knownRealRegulatory(originalRegulatory, for: machine) else { continue }
+                      acceptedOriginalRegulatory(originalRegulatory, machine: machine, current: root) else { continue }
                 if overwriteUSRegion {
                     guard currentCountry == "LL", currentRegion == "LL/A" else { continue }
                 } else {
                     guard currentCountry == originalCountry, currentRegion == originalRegion else { continue }
                 }
-                let minimal = extra[boardKey] as? String == expectedBoard &&
-                    extra[cpuKey] as? String == expectedCPU &&
+                let minimal = sameHardwareID(extra[boardKey], expectedBoard) &&
+                    sameHardwareID(extra[cpuKey], expectedCPU) &&
                     extra[regulatory] as? String == expectedSpoofRegulatory
-                let legacy = profile.board == extra[boardKey] as? String &&
-                    profile.cpu == extra[cpuKey] as? String &&
+                let legacy = sameHardwareID(extra[boardKey], profile.board) &&
+                    sameHardwareID(extra[cpuKey], profile.cpu) &&
                     extra[regulatory] as? String == expectedSpoofRegulatory
                 guard minimal || legacy else { continue }
                 found = original
                 break
+            }
+            if found == nil, let original = matchingOriginalIdentity(current: root),
+               original[productKey] as? String == machine,
+               sameHardwareID(original[boardKey], expectedBoard),
+               sameHardwareID(original[cpuKey], expectedCPU),
+               let originalCountry = original[country] as? String,
+               let originalRegion = original[region] as? String,
+               originalRegion == "\(originalCountry)/A",
+               (overwriteUSRegion
+                    ? currentCountry == "LL" && currentRegion == "LL/A"
+                    : currentCountry == originalCountry && currentRegion == originalRegion),
+               (sameHardwareID(extra[boardKey], expectedBoard) && sameHardwareID(extra[cpuKey], expectedCPU)) ||
+                 (sameHardwareID(extra[boardKey], profile.board) && sameHardwareID(extra[cpuKey], profile.cpu)) {
+                found = original
             }
             guard let originalIdentity = found else { throw SalesError.noOriginalBackup }
             for key in [productKey, boardKey, cpuKey] {
@@ -1585,11 +1747,12 @@ nonisolated enum RegionWriter {
             }
             let machine = deviceIdentifier()
             let cachedProduct = extra[productKey] as? String
-            guard let expectedBoard = physicalBoards[machine],
-                  let expectedCPU = physicalCPU(for: machine) else { throw SalesError.unknownModel }
+            let expectedHardware = expectedOriginalHardware(current: root, machine: machine)
+            guard let expectedBoard = expectedHardware.0,
+                  let expectedCPU = expectedHardware.1 else { throw SalesError.unknownModel }
             let isSpoofed = cachedProduct != nil && (
-                cachedProduct != machine || extra[boardKey] as? String != expectedBoard ||
-                extra[cpuKey] as? String != expectedCPU)
+                cachedProduct != machine || !sameHardwareID(extra[boardKey], expectedBoard) ||
+                !sameHardwareID(extra[cpuKey], expectedCPU))
             if requireSpoof && !isSpoofed { throw SalesError.alreadyReal }
             let model: String
             let targetCountry: String
@@ -1650,8 +1813,8 @@ nonisolated enum RegionWriter {
                 guard verify?[country] as? String == targetCountry, verify?[region] as? String == targetRegion,
                       verify?[regulatory] as? String == model else { throw WriteError.verify }
                 guard verify?[productKey] as? String == machine else { throw WriteError.verify }
-                guard verify?[boardKey] as? String == expectedBoard,
-                      verify?[cpuKey] as? String == expectedCPU else { throw WriteError.verify }
+                guard sameHardwareID(verify?[boardKey], expectedBoard),
+                      sameHardwareID(verify?[cpuKey], expectedCPU) else { throw WriteError.verify }
             } catch {
                 do {
                     try overwriteInPlace(original, at: target)
@@ -1689,8 +1852,8 @@ nonisolated enum RegionWriter {
             guard currentProduct != machine else { throw IdentityRestoreError.alreadyOriginal }
             let profiles = machine.hasPrefix("iPad") ? padSpoofProfiles : spoofProfiles
             guard profiles.contains(where: {
-                $0.product == currentProduct && $0.board == currentBoard &&
-                $0.cpu == currentCPU && $0.regulatory == currentModel
+                $0.product == currentProduct && sameHardwareID(currentBoard, $0.board) &&
+                sameHardwareID(currentCPU, $0.cpu) && $0.regulatory == currentModel
             }) else { throw IdentityRestoreError.unknownSpoof }
             guard FileManager.default.fileExists(atPath: backupDirectory.path) else { throw IdentityRestoreError.noBackup }
             let files = try FileManager.default.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)
