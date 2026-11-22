@@ -6,7 +6,7 @@ struct ExperimentalSpoofView: View {
     @State private var countryCode = "LL"
     @State private var busy = false
     @State private var showRisk = false
-    @State private var status = "仅对已核实的机型、板号、CPU 与监管型号组合写入。"
+    @State private var status = "尚未写入"
 
     private var target: RegionWriter.SpoofProfile? {
         RegionWriter.experimentalTargets.first { $0.id == selectedID }
@@ -20,7 +20,7 @@ struct ExperimentalSpoofView: View {
             List {
                 Section {
                     Text(YumLocalization.text(status)).font(.footnote).foregroundStyle(.secondary)
-                    Text("此功能会完整伪装机型身份，可能影响 Face ID、听写、通信和系统稳定性。写入前会备份完整 plist。")
+                    Text("写入前自动备份；伪装可能影响 Face ID、听写和通信。")
                         .font(.footnote).foregroundStyle(.red)
                 }
                 Section("目标机型") {
@@ -42,18 +42,18 @@ struct ExperimentalSpoofView: View {
                     }
                 }
                 Section {
-                    Button("写入实验性机型伪装", role: .destructive) {
+                    Button("写入机型伪装", role: .destructive) {
                         TapSound.play(.warning)
                         showRisk = true
                     }
                     .disabled(busy || regulatory == nil)
                 }
             }
-            .navigationTitle("完整机型伪装 · 实验性")
+            .navigationTitle("完整机型伪装")
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("完成") { TapSound.play(); dismiss() } } }
         }
         .fullScreenCover(isPresented: $showRisk) {
-            RiskScreen(title: "极高风险：完整机型伪装", detail: "将同时改写 ProductType、板号、CPU、监管型号与销售地区。可能导致 Face ID、听写、通信或启动异常。已知型号才允许写入；操作前保存完整备份。", action: "我了解风险，继续写入") {
+            RiskScreen(title: "极高风险：完整机型伪装", detail: "将写入机型、板号、CPU、监管型号和销售地区。可能导致 Face ID、听写、通信或启动异常；写入前会保存备份。", action: "确认写入") {
                 showRisk = false
                 apply()
             } cancel: { showRisk = false }

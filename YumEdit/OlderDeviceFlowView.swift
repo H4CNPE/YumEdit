@@ -7,7 +7,7 @@ struct OlderDeviceFlowView: View {
     @State private var spoofEnabled = false
     @State private var confirmedDownloaded = false
     @State private var snapshot: RegionWriter.DeviceSnapshot?
-    @State private var status = "确认资源下载完成后，再执行第二阶段。"
+    @State private var status = "尚未开始"
     @State private var busy = false
     @State private var showFirstRisk = false
     @State private var showSecondRisk = false
@@ -52,7 +52,7 @@ struct OlderDeviceFlowView: View {
                             .font(.footnote).foregroundStyle(.white.opacity(0.9))
                     }.listRowBackground(Color.red.opacity(0.75))
                 }
-                Section("第一阶段：临时伪装并下载资源") {
+                Section("第一阶段：写入临时伪装") {
                     Toggle("临时伪装机型", isOn: $spoofEnabled)
                         .onChange(of: spoofEnabled) { _, _ in TapSound.play(.confirm) }
                     if spoofEnabled {
@@ -64,19 +64,17 @@ struct OlderDeviceFlowView: View {
                         .onChange(of: selectedProduct) { _, _ in TapSound.play(.confirm) }
                     }
                     Text(YumLocalization.text(overwriteUSRegion
-                        ? "写入美区、SiriMode、生成式模型能力与三处 CacheData 槽位。临时伪装时同步匹配美版监管型号。写入前自动备份；完整重启后测试资源下载。"
-                        : "保持原行货销售地区不变，只写入 SiriMode、生成式模型能力与三处 CacheData 槽位。临时伪装时按原地区匹配监管型号。写入前自动备份；完整重启后测试资源下载。"))
+                        ? "写入美区及能力字段；重启后等待系统下载资源。"
+                        : "保留原销售地区，写入能力字段；重启后等待系统下载资源。"))
                         .font(.footnote).foregroundStyle(.secondary)
-                    Button("第一阶段：临时伪装并下载资源", role: .destructive) {
+                    Button("第一阶段：写入临时伪装", role: .destructive) {
                         TapSound.play(.warning)
                         showFirstRisk = true
                     }
                     .disabled(busy || snapshot == nil || snapshot?.isSpoofed == true || (snapshot?.olderAIReady == true && !spoofEnabled))
                 }
                 Section("第二阶段：恢复真实机型") {
-                    Text(YumLocalization.text(overwriteUSRegion
-                        ? "仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实机型，并匹配美版监管型号；保留美区与能力字段。找不到可信备份就拒绝写入。千万不要进入「设置 → Siri」。"
-                        : "仅在第一阶段选择机型伪装时使用。从同设备历史备份恢复真实机型与原行货监管型号；销售地区与能力字段保持不变。找不到可信备份就拒绝写入。千万不要进入「设置 → Siri」。"))
+                    Text("按本次记录恢复字段；找不到同机备份则拒绝写入。")
                         .font(.footnote).foregroundStyle(.secondary)
                     Toggle("我确认资源已下载完成", isOn: $confirmedDownloaded)
                         .onChange(of: confirmedDownloaded) { _, _ in TapSound.play(.confirm) }

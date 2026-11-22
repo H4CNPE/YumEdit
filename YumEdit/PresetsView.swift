@@ -37,7 +37,6 @@ struct PresetsView: View {
     @State private var showIslandRisk = false
     @State private var showIPadOSRisk = false
     @State private var showDisableIPadOSRisk = false
-    @State private var showRespringRisk = false
     @State private var respringActive = false
     private let islandOptions = [
         ("14 / 15 Pro · 2556", 2556), ("14 Pro Max · 2796", 2796),
@@ -50,7 +49,7 @@ struct PresetsView: View {
             List {
                 Section {
                     Text(YumLocalization.text(status)).font(.footnote).foregroundStyle(.secondary)
-                    Text("预设来自 BQTool 的公开字段表。开关只暂存变更，点击应用后才写入。关闭预设会移除对应键；若需回到精确原值，请用 plist 备份恢复。")
+                    Text("开关仅暂存；点击应用后写入。关闭预设会删除对应键，恢复原值需使用备份。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("常用预设") {
@@ -86,22 +85,18 @@ struct PresetsView: View {
                         .onChange(of: subtype) { _, _ in TapSound.play(.confirm) }
                         Button("应用所选灵动岛布局") { TapSound.play(.warning); showIslandRisk = true }
                             .disabled(busy)
-                        Text("iPhone 18 Pro 专用值未核实；以上仅为 BQTool 已知布局。")
-                            .font(.caption).foregroundStyle(.secondary)
                     }
                     Section("iPadOS 模式 · 极高风险") {
                         Button("实验：启用 iPadOS 模式") { TapSound.play(.warning); showIPadOSRisk = true }
                             .disabled(busy)
                         Button("关闭 iPadOS 模式", role: .destructive) { TapSound.play(.warning); showDisableIPadOSRisk = true }
                             .disabled(busy)
-                        Text("此项目会修改二进制 CacheData，标记校验失败时拒绝写入。请保留完整备份。")
-                            .font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Section {
                     Button(YumLocalization.text("应用暂存修改（\(pending.count) 个字段）")) { TapSound.play(.warning); showApplyRisk = true }
                         .disabled(pending.isEmpty || busy)
-                    Button("Respring（重启 SpringBoard）") { TapSound.play(.warning); showRespringRisk = true }
+                    Button("Respring（重启 SpringBoard）") { TapSound.play(.warning); respringActive = true }
                         .disabled(busy)
                 }
             }
@@ -133,12 +128,6 @@ struct PresetsView: View {
                 disableIPadOS()
             } cancel: { showDisableIPadOSRisk = false }
         }
-        .fullScreenCover(isPresented: $showRespringRisk) {
-            RiskScreen(title: "高风险：Respring", detail: "参考 BQTool 的 NeoSpring 方式触发 SpringBoard 重启。所有打开的 App 会关闭，未保存内容可能丢失；此方式在不同 iPadOS / iOS 版本上不保证成功。", action: "我了解风险，Respring") {
-                showRespringRisk = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { respringActive = true }
-            } cancel: { showRespringRisk = false }
-        }
         .fullScreenCover(isPresented: $respringActive) { NeoSpringView() }
     }
 
@@ -151,7 +140,6 @@ struct PresetsView: View {
         })) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(YumLocalization.text(preset.title))
-                Text(YumLocalization.text(preset.note)).font(.caption).foregroundStyle(.secondary)
             }
         }
     }

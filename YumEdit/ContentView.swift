@@ -33,22 +33,22 @@ struct ContentView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ObservedObject private var quickAction = QuickActionState.shared
     @AppStorage("overwriteUSRegion") private var overwriteUSRegion = true
+    @AppStorage("advancedToneEnabled") private var advancedToneEnabled = false
     @State private var busy = false
     @State private var success = false
     @State private var deviceSnapshot: RegionWriter.DeviceSnapshot?
     @State private var snapshotError: String?
     @State private var readingSnapshot = true
     @State private var showRisk = false
-    @State private var showExperimentsRisk = false
     @State private var showEuropeanRisk = false
     @State private var showIslandRisk = false
     @State private var showEditorRisk = false
-    @State private var showRespringRisk = false
     @State private var respringActive = false
     @State private var showEditor = false
     @State private var showPresets = false
     @State private var showExperiments = false
     @State private var showOlderFlow = false
+    @State private var showAdvancedToneFlow = false
     @State private var showPhotoRepairRisk = false
     @State private var showAbout = false
     @State private var showRestoreConfirm = false
@@ -60,7 +60,7 @@ struct ContentView: View {
     private var versionBadge: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
-        return "v\(version) · build \(build)"
+        return "v\(version) · build \(build) · Prerelease"
     }
 
     private var actionLayout: AnyLayout {
@@ -73,6 +73,7 @@ struct ContentView: View {
         if busy { return "处理中…" }
         if deviceSnapshot?.photoRepairNeeded == true { return "检测到扩图字段异常，点击修正" }
         if deviceSnapshot?.isOlderDevice == true { return "两步一键开启苹果智能" }
+        if advancedToneEnabled && isAdvancedToneCandidate { return "伪装成更新机型以启用高级 Siri AI" }
         if !overwriteUSRegion && deviceSnapshot?.isSpoofed != true { return "保持原销售地区，无需写入" }
         if deviceSnapshot?.isComplete == true { return "已完成，无需再次写入" }
         if deviceSnapshot?.isSpoofed == true { return "恢复真实机型并启动 Apple Intelligence" }
@@ -81,9 +82,14 @@ struct ContentView: View {
 
     private var primaryActionDisabled: Bool {
         guard let snapshot = deviceSnapshot else { return true }
-        if snapshot.photoRepairNeeded || snapshot.isSpoofed || snapshot.isOlderDevice { return false }
+        if snapshot.photoRepairNeeded || snapshot.isSpoofed || snapshot.isOlderDevice ||
+            (advancedToneEnabled && isAdvancedToneCandidate) { return false }
         if !overwriteUSRegion { return true }
         return snapshot.isComplete
+    }
+    private var isAdvancedToneCandidate: Bool {
+        guard let model = deviceSnapshot?.physicalModel else { return false }
+        return ["iPhone16,1", "iPhone16,2"].contains(model)
     }
 
     private var salesPolicyDescription: String {
@@ -98,9 +104,13 @@ struct ContentView: View {
 
     private var deviceStatus: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("设备状态")
-                .font(.subheadline.weight(.semibold))
-                .accessibilityAddTraits(.isHeader)
+            HStack {
+                Text("设备状态")
+                    .font(.subheadline.weight(.semibold))
+                    .accessibilityAddTraits(.isHeader)
+                Spacer()
+                UpdateLampView()
+            }
             ScrollView {
                 if readingSnapshot {
                     ProgressView("正在读取 MobileGestalt…")
@@ -131,6 +141,10 @@ struct ContentView: View {
                         Text(YumLocalization.text(deviceSnapshot.isOlderDevice
                             ? "开启方式：两阶段能力写入"
                             : "开启方式：原生机型区域策略"))
+                        Text(YumLocalization.text("Audio 机型") + "：" +
+                             (deviceSnapshot.audioProduct.map {
+                                "\($0) · \(DeviceNames.marketingName($0) ?? $0)"
+                             } ?? "—"))
                         if deviceSnapshot.showsExperimentalAIFields {
                             Text(YumLocalization.text(deviceSnapshot.siriMode.map { "SiriMode：\($0)" } ?? "SiriMode：缓存中无此键"))
                             Text(YumLocalization.text(deviceSnapshot.generativeCapability.map { "生成式模型能力：\($0)" } ?? "生成式模型能力：缓存中无此键"))
@@ -204,6 +218,34 @@ struct ContentView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
                 .background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 14))
+                if deviceSnapshot?.isOlderDevice == true {
+                    actionLayout {
+                        Button("修复面容") { TapSound.play(.warning); runFaceRepair() }
+                            .buttonStyle(HomeActionStyle())
+                        Button("修复听写") {
+                            TapSound.play(.warning)
+                            guard RegionWriter.selectedExperimentStrategy != nil else {
+                                status = "请先在高级选项选择实验策略"; return
+                            }
+                            runDictationRepair()
+                        }
+                        .buttonStyle(HomeActionStyle())
+                    }
+                    .disabled(busy || readingSnapshot)
+                } else if isAdvancedToneCandidate {
+                    Toggle("启用高级 Siri AI 音色", isOn: Binding(
+                        get: { advancedToneEnabled },
+                        set: { enabled in
+                            TapSound.play(.confirm)
+                            if enabled && RegionWriter.selectedExperimentStrategy == nil {
+                                status = "请先在高级选项选择实验策略"
+                                advancedToneEnabled = false
+                            } else { advancedToneEnabled = enabled }
+                        }))
+                        .font(.subheadline.weight(.semibold))
+                        .padding(12)
+                        .background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 14))
+                }
                 Button {
                     if deviceSnapshot?.photoRepairNeeded == true {
                         TapSound.play(.warning)
@@ -213,6 +255,11 @@ struct ContentView: View {
                     if deviceSnapshot?.isOlderDevice == true {
                         TapSound.play(.warning)
                         showOlderFlow = true
+                        return
+                    }
+                    if advancedToneEnabled && isAdvancedToneCandidate {
+                        TapSound.play(.confirm)
+                        showAdvancedToneFlow = true
                         return
                     }
                     if deviceSnapshot?.isSpoofed == true {
@@ -272,7 +319,7 @@ struct ContentView: View {
                     }
                     Button {
                         TapSound.play(.warning)
-                        showRespringRisk = true
+                        respringActive = true
                     } label: {
                         Label("Respring", systemImage: "arrow.clockwise")
                     }
@@ -300,15 +347,11 @@ struct ContentView: View {
                 .buttonStyle(HomeActionStyle()).disabled(busy)
                 Button {
                     TapSound.play(.warning)
-                    showExperimentsRisk = true
+                    showExperiments = true
                 } label: {
                     Label("高级选项", systemImage: "slider.vertical.3")
                 }
                 .buttonStyle(HomeActionStyle()).disabled(busy)
-                if !compactHeight {
-                    Text("仅写入已知机型。请先完成整机备份。")
-                        .font(.footnote).foregroundStyle(.secondary)
-                }
                 Button {
                     TapSound.play()
                     showAbout = true
@@ -352,12 +395,6 @@ struct ContentView: View {
                 }
             }
         }
-        .fullScreenCover(isPresented: $showExperimentsRisk) {
-            RiskScreen(title: "高风险：高级选项", detail: "外接屏与完整机型修改可能影响音频、Face ID 或系统稳定性。请先备份整机。各项写入仍会再次确认。", action: "我了解风险，进入高级选项") {
-                showExperimentsRisk = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showExperiments = true }
-            } cancel: { showExperimentsRisk = false }
-        }
         .fullScreenCover(isPresented: $showIslandRisk) {
             RiskScreen(title: "高风险：灵动岛布局", detail: "参考 BQTool 修改 Dynamic Island 与 ArtworkDeviceSubType。iPhone 18 Pro 专用值尚未核实，本选项使用已知 16 Pro 布局值 2622 试验；可能错位、遮挡状态栏或影响 Face ID。写入前会备份；重启或 respring 后观察。", action: "我了解风险，继续写入") {
                 showIslandRisk = false
@@ -382,17 +419,12 @@ struct ContentView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showEditor = true }
             } cancel: { showEditorRisk = false }
         }
-        .fullScreenCover(isPresented: $showRespringRisk) {
-            RiskScreen(title: "高风险：Respring", detail: "参考 BQTool 的 NeoSpring 方式触发 SpringBoard 重启。所有打开的 App 会关闭，未保存内容可能丢失；此方式在不同 iPadOS / iOS 版本上不保证成功。", action: "我了解风险，Respring") {
-                showRespringRisk = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { respringActive = true }
-            } cancel: { showRespringRisk = false }
-        }
         .fullScreenCover(isPresented: $respringActive) { NeoSpringView() }
         .sheet(isPresented: $showEditor) { GestaltEditorView() }
         .sheet(isPresented: $showPresets) { PresetsView() }
         .sheet(isPresented: $showExperiments) { ExperimentsView() }
         .sheet(isPresented: $showOlderFlow) { OlderDeviceFlowView() }
+        .sheet(isPresented: $showAdvancedToneFlow) { AdvancedToneFlowView() }
         .sheet(isPresented: $showAbout) { AboutView().presentationDetents([.medium]) }
         .alert("恢复 MobileGestalt 备份", isPresented: $showRestoreConfirm) {
             Button("恢复所示备份", role: .destructive) {
@@ -438,7 +470,7 @@ struct ContentView: View {
     private func presentRespringShortcutIfNeeded() {
         guard quickAction.respringRequested else { return }
         quickAction.respringRequested = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showRespringRisk = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { respringActive = true }
     }
 
     private func refreshSnapshot() {
@@ -463,6 +495,28 @@ struct ContentView: View {
                 busy = false
                 success = result.0
                 status = result.1
+                TapSound.play(result.0 ? .success : .failure)
+                refreshSnapshot()
+            }
+        }
+    }
+    private func runFaceRepair() {
+        busy = true
+        Task.detached {
+            let result = RegionWriter.restoreRealHardwareIdentity()
+            await MainActor.run {
+                busy = false; success = result.0; status = result.1
+                TapSound.play(result.0 ? .success : .failure)
+                refreshSnapshot()
+            }
+        }
+    }
+    private func runDictationRepair() {
+        busy = true
+        Task.detached {
+            let result = RegionWriter.restoreExperiment()
+            await MainActor.run {
+                busy = false; success = result.0; status = result.1
                 TapSound.play(result.0 ? .success : .failure)
                 refreshSnapshot()
             }
@@ -507,6 +561,23 @@ struct ContentView: View {
 }
 
 nonisolated enum RegionWriter {
+    enum ExperimentStrategy: Int, CaseIterable, Sendable, Identifiable {
+        case fullRestoreAll = 1, fullKeepAudio, originalPlusAudioRestoreAll, originalPlusAudioKeepAudio
+        var id: Int { rawValue }
+        var title: String {
+            switch self {
+            case .fullRestoreAll: "全量伪装 · 全部恢复"
+            case .fullKeepAudio: "全量伪装 · 保留 Audio"
+            case .originalPlusAudioRestoreAll: "原范围 + Audio · 全部恢复"
+            case .originalPlusAudioKeepAudio: "原范围 + Audio · 保留 Audio"
+            }
+        }
+        var isFull: Bool { self == .fullRestoreAll || self == .fullKeepAudio }
+        var keepsAudio: Bool { self == .fullKeepAudio || self == .originalPlusAudioKeepAudio }
+    }
+    static var selectedExperimentStrategy: ExperimentStrategy? {
+        ExperimentStrategy(rawValue: UserDefaults.standard.integer(forKey: "experimentStrategy"))
+    }
     enum SalesSource: String, Sendable { case china, europe }
     struct DeviceSnapshot: Sendable {
         struct HardwareDifference: Sendable {
@@ -529,6 +600,7 @@ nonisolated enum RegionWriter {
         let isOlderDevice: Bool
         let olderAIReady: Bool
         let photoRepairNeeded: Bool
+        let audioProduct: String?
 
         var identityWarning: String {
             cachedModel != physicalModel
@@ -624,6 +696,9 @@ nonisolated enum RegionWriter {
         return products[machine] ?? olderUSModels[machine]
     }
     static func applyExperimentalSpoof(targetID: String, countryCode: String) -> (Bool, String) {
+        guard let strategy = selectedExperimentStrategy else {
+            return (false, "请先在高级选项选择实验策略")
+        }
         let code = countryCode.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         guard code.range(of: "^[A-Z]{1,3}$", options: .regularExpression) != nil else {
             return (false, "销售地区代码必须是 1–3 个英文字母")
@@ -636,6 +711,7 @@ nonisolated enum RegionWriter {
         guard let realBoard = physicalBoards[machine], let realCPU = physicalCPU(for: machine) else {
             return (false, "当前真实机型未列入已核实硬件表，未写入")
         }
+        var marketingApplied = true
         let outcome = mutateRoot { root in
             let baseline = matchingOriginalIdentity(current: root)
             guard var extra = root["CacheExtra"] as? [String: Any],
@@ -656,11 +732,15 @@ nonisolated enum RegionWriter {
             extra[regulatory] = model
             extra[country] = code
             extra[region] = "\(code)/A"
+            marketingApplied = try applyExperimentFields(&extra, originalRoot: root, target: target, strategy: strategy)
             var changed = root
             changed["CacheExtra"] = extra
             return changed
         }
-        return outcome.0 ? (true, "实验性机型、板号、CPU、监管型号与销售地区已写入并校验；请完整重启。") : outcome
+        return outcome.0
+            ? (true, "机型字段已写入并校验。" +
+               (marketingApplied ? "" : " 型号名称未通过原值校验，保持不变。") + " 请完整重启；系统效果待真机验证。")
+            : outcome
     }
     private static func knownRealRegulatory(_ model: String, for machine: String) -> Bool {
         if machine.hasPrefix("iPad") {
@@ -686,6 +766,127 @@ nonisolated enum RegionWriter {
     private static let productKey = "h9jDsbgj7xIVeIQ8S3/X3Q"
     private static let boardKey = "oYicEKzVTz4/CxxE05pEgQ"
     private static let cpuKey = "5pYKlGnYYBzGvAlIU8RjEQ"
+    private static let audioProductKey = "+1TeoctsaQC55zwHZ6MESg"
+    private static let cameraProductKey = "myx96YOqBSDzLwljSYWBiQ"
+    private static let thinningProductKey = "0+nc/Udy4WNG8S+Q7a/s1A"
+    private static let marketingProductKey = "j9Th5smJpdztHwc+i39zIg"
+    private static let marketingNameKey = "Z/dqyWS6OZTRy10UcmUAhw"
+    private static let physicalHardwareNameKey = "bbtR9jQx50Fv5Af/affNtA"
+    private static let compatibleAppVariantsKey = "VuGdqp8UBpi9vPWHlPluVQ"
+    // Explicit MGKeys model identity keys. Never rewrite by scanning for values that resemble a model ID.
+    private static let fullProductKeys = [
+        thinningProductKey, cameraProductKey,
+        "G91h5IuJvXISeyngNFqEpg", // ProductTypeDescForUserVisibility
+        "GEsznZwAYGOa1a67QU1Uew", // ProductTypeDescForPowerPerf
+        "GqAdWRLnC7oYQrNYF48VYA", // SubProductType
+        "MKE8hwsOxxRCtwBk2aDBZA", // ProductTypeDescForAutomatedTesting
+        "xNN67KktpWp7syTT3S1BFA"  // ProductTypeDescForAnalytics
+    ]
+    private static let fullHardwareKeys = [
+        "/YYygAofPDbhrwToVsXdeA", // HWModelStr
+        "GGIIDN/ANr8X2WrgS6nBYQ", // HWModelUniqueStr
+        "dW5fpt/6HhaTbnK/UqL6cA", // HWModelDescriptionForAudio
+        "b4e7mEbjqfewD6oXmo9U5g", // HWModelDescriptionForPowerPerf
+        "oQNDePXjSD1z7W0ddqt9tg", // HWModelDescriptionForAutomatedTesting
+        "uCIk6n9Am5fsV2cTjhqFQw", // HWModelDescriptionForAnalytics
+        "yAfB6E2v0++rHtdW7SDg8w", // HWModelDescriptionForCamera
+        "ZGraRMW0TsxCvONeeJ5C2w"  // HWModelDescriptionForUserVisibility
+    ]
+    private static var experimentRecordURL: URL {
+        backupDirectory.appendingPathComponent("ExperimentOperation-\(deviceIdentifier()).plist")
+    }
+    private static func applyExperimentFields(_ extra: inout [String: Any],
+                                              originalRoot: [String: Any], target: SpoofProfile,
+                                              strategy: ExperimentStrategy) throws -> Bool {
+        guard let original = originalRoot["CacheExtra"] as? [String: Any],
+              let machine = original[productKey] as? String,
+              machine == deviceIdentifier(), originalRoot["CacheUUID"] is String,
+              originalRoot["CacheData"] is Data else { throw SalesError.unknownSpoof }
+        var changed: [String: Any] = [
+            productKey: extra[productKey] ?? target.product,
+            boardKey: extra[boardKey] ?? target.board,
+            cpuKey: extra[cpuKey] ?? target.cpu,
+            regulatory: extra[regulatory] ?? target.regulatory,
+            country: extra[country] ?? "LL",
+            region: extra[region] ?? "LL/A",
+            audioProductKey: target.product
+        ]
+        extra[audioProductKey] = target.product
+        if strategy.isFull {
+            for key in fullProductKeys {
+                guard let value = original[key] as? String,
+                      value == machine else { continue }
+                extra[key] = target.product
+                changed[key] = target.product
+            }
+            let originalBoard = original[boardKey] as? String
+            for key in fullHardwareKeys {
+                guard let value = original[key] as? String,
+                      sameHardwareID(value, originalBoard) else { continue }
+                extra[key] = target.board
+                changed[key] = target.board
+            }
+            if let variants = original[compatibleAppVariantsKey] as? [String],
+               variants.contains(machine) {
+                let updated = variants.map { $0 == machine ? target.product : $0 }
+                extra[compatibleAppVariantsKey] = updated
+                changed[compatibleAppVariantsKey] = updated
+            }
+            if let originalName = DeviceNames.marketingName(machine),
+               let targetName = DeviceNames.marketingName(target.product) {
+                for key in [marketingNameKey, marketingProductKey, physicalHardwareNameKey] {
+                    guard let value = original[key] as? String,
+                          value.trimmingCharacters(in: .whitespacesAndNewlines) == originalName else { continue }
+                    extra[key] = targetName
+                    changed[key] = targetName
+                }
+            }
+        }
+        var record: [String: Any] = ["strategy": strategy.rawValue,
+                                     "original": originalRoot, "changed": changed,
+                                     "target": target.product]
+        record["version"] = 1
+        try FileManager.default.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+        let data = try PropertyListSerialization.data(fromPropertyList: record, format: .binary, options: 0)
+        try data.write(to: experimentRecordURL, options: .atomic)
+        guard try Data(contentsOf: experimentRecordURL) == data else { throw WriteError.verify }
+        return !strategy.isFull || changed[marketingNameKey] != nil
+    }
+    private static func restoredExperimentExtra(current: [String: Any]) throws -> [String: Any] {
+        let bytes = try Data(contentsOf: experimentRecordURL)
+        guard let record = try PropertyListSerialization.propertyList(from: bytes, format: nil) as? [String: Any],
+              let strategyRaw = record["strategy"] as? Int,
+              let strategy = ExperimentStrategy(rawValue: strategyRaw),
+              let originalRoot = record["original"] as? [String: Any],
+              let original = originalRoot["CacheExtra"] as? [String: Any],
+              original[productKey] as? String == deviceIdentifier(),
+              let changed = record["changed"] as? [String: Any],
+              var extra = current["CacheExtra"] as? [String: Any],
+              let originalUUID = originalRoot["CacheUUID"] as? String,
+              originalUUID == current["CacheUUID"] as? String,
+              let originalData = originalRoot["CacheData"] as? Data,
+              let currentData = current["CacheData"] as? Data,
+              originalData == currentData || (try? patchOlderAIBits(originalData)) == currentData else {
+            throw SalesError.noOriginalBackup
+        }
+        for (key, value) in changed {
+            guard propertyListValuesEqual(extra[key], value) ||
+                    propertyListValuesEqual(extra[key], original[key]) else { throw SalesError.unknownSpoof }
+        }
+        for key in changed.keys {
+            if key == audioProductKey && strategy.keepsAudio { continue }
+            extra[key] = original[key] // nil removes a missing key; an empty string remains present.
+        }
+        return extra
+    }
+    static func restoreExperiment() -> (Bool, String) {
+        let result = mutateRoot { root in
+            var changed = root
+            changed["CacheExtra"] = try restoredExperimentExtra(current: root)
+            return changed
+        }
+        return result.0 ? (true, "已按本次伪装策略恢复字段。请重启并测试听写、Face ID。") : result
+    }
     // Compare hardware identifiers without altering the strings stored in the cache.
     private static func sameHardwareID(_ cached: Any?, _ expected: String?) -> Bool {
         guard let cached = cached as? String, let expected else { return false }
@@ -799,6 +1000,7 @@ nonisolated enum RegionWriter {
             let regulatoryValue = extra[regulatory] as? String ?? "—"
             let siriModeValue = extra[siriModeKey] as? Int
             let generativeValue = extra[generativeKey] as? Int
+            let audioProduct = extra[audioProductKey] as? String
             var hardwareDifferences: [DeviceSnapshot.HardwareDifference] = []
             for (field, key, expected) in [("主板型号", boardKey, expectedBoard), ("芯片型号", cpuKey, expectedCPU)] {
                 let value = extra[key] as? String
@@ -828,7 +1030,8 @@ nonisolated enum RegionWriter {
                 isComplete: isComplete,
                 isOlderDevice: isOlderAIEligible(physical),
                 olderAIReady: olderAIReady,
-                photoRepairNeeded: photoRepairNeeded)
+                photoRepairNeeded: photoRepairNeeded,
+                audioProduct: audioProduct)
             return (snapshot, nil)
         } catch {
             return (nil, error.localizedDescription)
@@ -1562,6 +1765,9 @@ nonisolated enum RegionWriter {
         let profiles = machine.hasPrefix("iPad") ? padSpoofProfiles : spoofProfiles
         let profile = profileProduct.flatMap { selected in profiles.first(where: { $0.product == selected }) }
         if profileProduct != nil && profile == nil { return (false, "未知临时伪装机型，未写入") }
+        if profile != nil && selectedExperimentStrategy == nil {
+            return (false, "请先在高级选项选择实验策略")
+        }
         let result = mutateRoot { root in
             let expectedHardware = expectedOriginalHardware(current: root, machine: machine)
             guard var extra = root["CacheExtra"] as? [String: Any],
@@ -1603,6 +1809,9 @@ nonisolated enum RegionWriter {
             if let profile { extra[productKey] = profile.product }
             extra[siriModeKey] = 2
             extra[generativeKey] = 1
+            if let profile, let strategy = selectedExperimentStrategy {
+                _ = try applyExperimentFields(&extra, originalRoot: root, target: profile, strategy: strategy)
+            }
             var changed = root
             changed["CacheExtra"] = extra
             changed["CacheData"] = try patchOlderAIBits(cacheData)
@@ -1710,6 +1919,9 @@ nonisolated enum RegionWriter {
                 extra[regulatory] = matched
             } else {
                 extra[regulatory] = originalRegulatory
+            }
+            if let recorded = try? restoredExperimentExtra(current: root) {
+                extra = recorded
             }
             // Keep the selected sales region and AI capability fields exactly as cached.
             var changed = root
@@ -1845,15 +2057,19 @@ nonisolated enum RegionWriter {
         let outcome = mutateRoot { root in
             guard var extra = root["CacheExtra"] as? [String: Any],
                   let currentData = root["CacheData"] as? Data,
+                  let currentUUID = root["CacheUUID"] as? String,
                   let currentProduct = extra[productKey] as? String,
                   let currentBoard = extra[boardKey] as? String,
                   let currentCPU = extra[cpuKey] as? String,
                   let currentModel = extra[regulatory] as? String else { throw IdentityRestoreError.invalidCache }
             guard currentProduct != machine else { throw IdentityRestoreError.alreadyOriginal }
             let profiles = machine.hasPrefix("iPad") ? padSpoofProfiles : spoofProfiles
+            let expected = expectedOriginalHardware(current: root, machine: machine)
             guard profiles.contains(where: {
-                $0.product == currentProduct && sameHardwareID(currentBoard, $0.board) &&
-                sameHardwareID(currentCPU, $0.cpu) && $0.regulatory == currentModel
+                $0.product == currentProduct &&
+                ((sameHardwareID(currentBoard, $0.board) && sameHardwareID(currentCPU, $0.cpu)) ||
+                 (sameHardwareID(currentBoard, expected.0) && sameHardwareID(currentCPU, expected.1))) &&
+                experimentalRegulatory($0, countryCode: extra[country] as? String ?? "LL") == currentModel
             }) else { throw IdentityRestoreError.unknownSpoof }
             guard FileManager.default.fileExists(atPath: backupDirectory.path) else { throw IdentityRestoreError.noBackup }
             let files = try FileManager.default.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)
@@ -1866,8 +2082,9 @@ nonisolated enum RegionWriter {
             for file in files {
                 guard let bytes = try? Data(contentsOf: file),
                       let backup = try? PropertyListSerialization.propertyList(from: bytes, format: nil) as? [String: Any],
+                      backup["CacheUUID"] as? String == currentUUID,
                       let originalData = backup["CacheData"] as? Data,
-                      originalData == currentData,
+                      (originalData == currentData || (try? patchOlderAIBits(originalData)) == currentData),
                       let original = backup["CacheExtra"] as? [String: Any],
                       original[productKey] as? String == machine,
                       let board = original[boardKey] as? String, !board.isEmpty,

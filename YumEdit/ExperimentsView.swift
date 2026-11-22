@@ -2,8 +2,7 @@ import SwiftUI
 
 struct ExperimentsView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var status = "实验结果需要在真机重启后验证。"
-    @State private var busy = false
+    @AppStorage("experimentStrategy") private var experimentStrategy = 0
     @State private var showExternalRisk = false
     @State private var showExternal = false
     @State private var showSpoofRisk = false
@@ -12,25 +11,28 @@ struct ExperimentsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    Text(YumLocalization.text(status)).font(.footnote).foregroundStyle(.secondary)
-                    Text("以下功能未经当前设备验证；写入成功不代表系统会启用功能。")
+                Section("听写与 Siri AI 音色实验") {
+                    Picker("实验策略", selection: $experimentStrategy) {
+                        Text("未选择").tag(0)
+                        ForEach(RegionWriter.ExperimentStrategy.allCases) { strategy in
+                            Text(YumLocalization.text(strategy.title)).tag(strategy.rawValue)
+                        }
+                    }
+                    .onChange(of: experimentStrategy) { _, _ in TapSound.play(.confirm) }
+                    Text("仅决定下次伪装的字段范围；恢复采用本次操作记录的策略。系统效果待真机验证。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
-                Section("完整机型伪装") {
-                    Text("选择目标机型与销售地区，自动填写已核实的板号、CPU 和监管型号。未知组合拒绝写入。")
-                        .font(.footnote).foregroundStyle(.secondary)
-                    Button("进入完整机型伪装", role: .destructive) {
+                Section {
+                    Button("完整机型伪装", role: .destructive) {
                         TapSound.play(.warning); showSpoofRisk = true
                     }
-                    .disabled(busy)
                 }
-                OriginalIdentityView()
-                Section("外接屏扩展实验") {
-                    Text("分阶段测试 iPad 多任务能力和设备类别。可能损坏音频、通话或相机视频；扩展桌面尚未得到验证。")
-                        .font(.footnote).foregroundStyle(.secondary)
-                    Button("进入外接屏实验") { TapSound.play(.warning); showExternalRisk = true }
-                        .disabled(busy)
+                Section {
+                    NavigationLink("校验基准") { OriginalIdentityView() }
+                        .simultaneousGesture(TapGesture().onEnded { TapSound.play() })
+                }
+                Section {
+                    Button("外接屏扩展实验") { TapSound.play(.warning); showExternalRisk = true }
                 }
             }
             .navigationTitle("高级选项")

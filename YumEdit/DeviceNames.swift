@@ -111,4 +111,6 @@ nonisolated enum DeviceNames {
         guard let name = names[productType] else { return productType }
         return "\(name) (\(productType))"
     }
+
+    static func marketingName(_ productType: String) -> String? { names[productType] }
 }

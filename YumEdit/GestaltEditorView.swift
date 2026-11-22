@@ -39,7 +39,6 @@ struct GestaltEditorView: View {
     @State private var status = "读取中…"
     @State private var busy = false
     @State private var showWriteRisk = false
-    @State private var showRespringRisk = false
     @State private var respringActive = false
     private let types = ["String", "Integer", "Boolean", "Data"]
 
@@ -48,7 +47,7 @@ struct GestaltEditorView: View {
             List {
                 Section {
                     Text(YumLocalization.text(status)).font(.footnote).foregroundStyle(.secondary)
-                    Text("只编辑 CacheExtra。集合类型只读。修改先暂存，确认后才写入系统缓存。")
+                    Text("仅编辑 CacheExtra；暂存后点击应用才写入。集合类型只读。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section(YumLocalization.text("字段（\(fields.count)）")) {
@@ -96,7 +95,7 @@ struct GestaltEditorView: View {
                 Section("操作") {
                     Button(YumLocalization.text("应用暂存字段（\(pending.count)）")) { TapSound.play(.warning); showWriteRisk = true }
                         .disabled(pending.isEmpty || busy)
-                    Button("Respring（重启 SpringBoard）") { TapSound.play(.warning); showRespringRisk = true }
+                    Button("Respring（重启 SpringBoard）") { TapSound.play(.warning); respringActive = true }
                         .disabled(busy)
                 }
             }
@@ -106,16 +105,10 @@ struct GestaltEditorView: View {
         }
         .task { load() }
         .fullScreenCover(isPresented: $showWriteRisk) {
-            RiskScreen(title: "高风险：直接改字段", detail: "将写入 \(pending.count) 个 CacheExtra 字段。错误的键、类型或值可能导致功能失效、循环重启或需要恢复设备。写入前会保存完整 plist，失败时尝试回滚。", action: "我了解风险，应用字段") {
+            RiskScreen(title: "高风险：直接改字段", detail: "将写入 \(pending.count) 个 CacheExtra 字段。错误值可能导致功能失效或循环重启；写入前会备份，失败时尝试回滚。", action: "确认应用字段") {
                 showWriteRisk = false
                 apply()
             } cancel: { showWriteRisk = false }
-        }
-        .fullScreenCover(isPresented: $showRespringRisk) {
-            RiskScreen(title: "高风险：Respring", detail: "参考 BQTool 的 NeoSpring 方式触发 SpringBoard 重启。所有打开的 App 会关闭，未保存内容可能丢失；此方式在不同 iPadOS / iOS 版本上不保证成功。", action: "我了解风险，Respring") {
-                showRespringRisk = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { respringActive = true }
-            } cancel: { showRespringRisk = false }
         }
         .fullScreenCover(isPresented: $respringActive) { NeoSpringView() }
     }

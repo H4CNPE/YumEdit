@@ -8,25 +8,25 @@ struct OriginalIdentityView: View {
     @State private var regulatory = ""
     @State private var country = ""
     @State private var source = "未设置"
-    @State private var status = "导入改机前的原版 MobileGestalt plist，或手动填写原始机型参数。"
+    @State private var status = "导入原版 plist 或填写原始参数。"
     @State private var showingImporter = false
     @State private var confirmingManual = false
     @State private var confirmingClear = false
 
     var body: some View {
-        Group {
-                Section("校验基准") {
+        Form {
+                Section("当前基准") {
                     LabeledContent("物理机型", value: RegionWriter.physicalIdentifier)
                     LabeledContent("基准来源", value: source)
                     Text(YumLocalization.text(status))
                         .font(.footnote).foregroundStyle(.secondary)
                 }
-                Section("导入原版文件") {
-                    Button("选择 MobileGestalt plist") { showingImporter = true }
-                    Text("文件必须包含同一设备的 CacheExtra、CacheUUID 和 CacheData。指纹不匹配时仅保存供核对，不用于恢复写入。")
+                Section("原版 plist") {
+                    Button("导入原版 plist") { TapSound.play(); showingImporter = true }
+                    Text("仅同机完整缓存可用于恢复；指纹不符时只保存供核对。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
-                Section("手动修改原始参数") {
+                Section("手动参数") {
                     TextField("ProductType，例如 iPhone13,2", text: $product)
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
                     TextField("主板型号，例如 D53gAP", text: $board)
@@ -37,16 +37,17 @@ struct OriginalIdentityView: View {
                         .textInputAutocapitalization(.characters).autocorrectionDisabled()
                     TextField("原销售地区，例如 CH", text: $country)
                         .textInputAutocapitalization(.characters).autocorrectionDisabled()
-                    Text("区域将按销售地区生成，例如 CH/A。手填参数会参与 YumEdit 的原始身份校验，不会立即改写系统缓存。")
+                    Text("保存后仅更改 YumEdit 的校验基准，不写入系统缓存。")
                         .font(.footnote).foregroundStyle(.secondary)
-                    Button("保存为原始身份校验基准") { confirmingManual = true }
+                    Button("保存基准") { TapSound.play(.warning); confirmingManual = true }
                 }
                 if source != "未设置" {
                     Section {
-                        Button("移除自定义校验基准", role: .destructive) { confirmingClear = true }
+                        Button("移除基准", role: .destructive) { TapSound.play(.warning); confirmingClear = true }
                     }
                 }
         }
+        .navigationTitle("校验基准")
         .onAppear(perform: reload)
             .fileImporter(isPresented: $showingImporter,
                           allowedContentTypes: [UTType(filenameExtension: "plist") ?? .data]) { result in
@@ -67,12 +68,13 @@ struct OriginalIdentityView: View {
                 }
             }
             .confirmationDialog("保存手填原始身份？", isPresented: $confirmingManual) {
-                Button("保存校验基准") { saveManual() }
+                Button("保存校验基准") { TapSound.play(.confirm); saveManual() }
             } message: {
                 Text("手填参数由你提供，YumEdit 无法独立证明其真实性。错误参数可能导致后续恢复写入错误。")
             }
             .confirmationDialog("移除自定义校验基准？", isPresented: $confirmingClear) {
                 Button("移除", role: .destructive) {
+                    TapSound.play(.confirm)
                     do {
                         try RegionWriter.clearOriginalIdentity()
                         source = "未设置"
